@@ -18,6 +18,18 @@ The ignored `.tipwink-pilot.json` records `bucket`, `endpoint`, `prefix`, `regio
 
 The script prints the path to the signed files under `.build/tipwink-pilot/releases`. If the network fails after staging, retry those same files with `./scripts/release-pilot --resume <staged-directory>`. To change the contents of a staged release, increment the version and build number.
 
+### Add the GitHub download
+
+After the script verifies the OSS update, attach its staged ZIP to a GitHub prerelease so people with repository access can download it from [Releases](https://github.com/rendeyuwei/Tipwink/releases). Use the same signed file for both downloads. Set `VERSION` to the release version, `ZIP_PATH` to the staged ZIP, `SOURCE_COMMIT` to the pushed commit that was built, and `NOTES_PATH` to your release notes file.
+
+```sh
+gh release create "v$VERSION" "$ZIP_PATH" --repo rendeyuwei/Tipwink \
+  --target "$SOURCE_COMMIT" --prerelease --title "Tipwink $VERSION" \
+  --notes-file "$NOTES_PATH"
+```
+
+Put a direct download link in the release notes with the path `/releases/download/v<VERSION>/Tipwink-<VERSION>-macOS-arm64.zip` on the repository URL. Label the package as a pilot.
+
 For distribution to other Mac users, build a Developer ID signed and notarized version and use a separate release feed.
 
 ## Set up the first distribution build

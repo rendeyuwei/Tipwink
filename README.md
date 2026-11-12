@@ -1,42 +1,46 @@
 # Tipwink
 
-English · [简体中文](README.zh-CN.md)
+**A little character for your Mac cursor.**
 
-Tipwink is a native macOS app for customizing your cursor. Switch between themes, adjust the size, and try each cursor on light or dark backgrounds before applying it to your desktop. The preview area lets you click buttons, hover over links, select text, and drag.
+Give your pointer a paper cat, a folded plane, or a look of your own. Try it on light and dark backgrounds and see your changes take effect on the desktop.
 
-Choose from six built-in themes.
+**[Download for Mac](https://github.com/rendeyuwei/Tipwink/releases)** · [简体中文](README.zh-CN.md)
 
-- **Paper Cat (纸片猫):** The Classic style keeps the original proportions and smile, and the cat blinks when you click. Cat Only uses the tip of the left ear as the click point and raises a paw over links.
-- **Pixel Jelly (像素果冻):** A playful pixel art theme.
-- **Two-Tone Arrow (双色箭头):** An arrow with separate fill and outline colors.
-- **Paper Plane (纸飞机)** points with its folded nose.
-- **Gummy Ghost (软糖幽灵)** points with the tip of its hood and raises a hand over links.
-- **Night Crosshair (夜光准星)** uses mint ticks around a center point for precise positioning.
+Apple Silicon · macOS 26 or later · Pilot build
+
+![Paper Plane, Gummy Ghost, and Night Crosshair on light and dark backgrounds](docs/images/cursor-preview.png)
+
+## Find your cursor
+
+| Theme | What makes it yours |
+| --- | --- |
+| **Paper Cat** | Click to see it blink. In Cat Only mode, the ear points and a paw comes up over links. |
+| **Pixel Jelly** | Chunky pixels in grape and mint. |
+| **Two-Tone Arrow** | Pick your own fill and outline colors. |
+| **Paper Plane** | A folded paper pointer with its nose at the click point. |
+| **Gummy Ghost** | A soft lilac ghost that raises a hand over links. |
+| **Night Crosshair** | Mint marks around a clear center point for precise clicks. |
 
 ## Try it on your Mac
 
-1. Open Tipwink (纸尖) on an Apple Silicon Mac running macOS 26 or later.
-2. Choose a theme and adjust its size from 75% to 150%. For Two-Tone Arrow, you can also change the fill and outline colors.
-3. Click **Apply to Desktop (应用到桌面)** to enable live theming. Changes to the theme, style, size, or colors take effect on the desktop as you make them. Restore the original cursor from the app window or menu bar to return to preview mode.
+1. Download the `Tipwink-…-macOS-arm64.zip` asset from the release page, then unzip and open **Tipwink** (纸尖).
+2. Choose a theme and preview its pointer, link, and text cursors. You can test clicks, links, text selection, and dragging, and set the size from 75% to 150%.
+3. Choose **Apply to Desktop** (应用到桌面). Theme, style, size, and color changes apply as you make them. Use **Restore Original Cursor** (恢复原光标) in the window or menu bar to switch back.
 
-Tipwink restores the previous cursor when it quits normally. If the app exits unexpectedly, a recovery process in the same login session attempts to restore the cursor. The app also checks for a recovery record on its next launch.
+Already running the pilot? Choose **Check for Updates…** (检查更新…) from the app menu or menu bar.
 
-Preview settings are stored locally, and all theme assets ship with the app. Desktop cursor replacement uses private WindowServer interfaces. Apps that draw their own cursors, some system surfaces, and different macOS versions may behave differently. The current build is signed for local use. Public distribution requires Developer ID signing and notarization.
+The pilot ZIP uses Apple Development signing. Public distribution requires a Developer ID signed and notarized build. Apps that draw their own cursors and some system screens may show a different pointer.
 
-## Updates
+## Build and publish
 
-Distribution builds check for updates in the background while Tipwink is running. Use **Check for Updates…** (检查更新…) from the app menu or the menu bar, or turn off **Automatically Check for Updates** (自动检查更新) there. Tipwink asks before installing a new version. Builds without an update feed show the current version in the check dialog. See [the release guide](docs/updates.md) for setup.
+Open [Tipwink.xcodeproj](Tipwink.xcodeproj) in Xcode 26 or later and run the **Tipwink** scheme.
 
-## Build from source
+On the configured release Mac, increment the version and build number, then run this from the checkout root:
 
-Open [Tipwink.xcodeproj](Tipwink.xcodeproj) in Xcode 26 or later and run the **Tipwink** scheme. The app uses SwiftUI, AppKit, and Core Graphics. [WindowServer.swift](Sources/WindowServer.swift) and [DesktopThemeEngine.swift](Sources/DesktopThemeEngine.swift) handle reading, applying, and restoring system cursors. All six themes are drawn in [CursorTheme.swift](Sources/CursorTheme.swift).
+```sh
+./scripts/release-pilot
+```
 
-## What we've verified
+The script builds, signs, and verifies the OSS pilot update. The same signed ZIP can also be attached to a GitHub release. [Release guide](docs/updates.md)
 
-On an Apple Silicon Mac running macOS 26.6.2, a separate test app confirmed the image sizes and hotspots of the arrow, pointing hand, and text cursors. We also verified 150% scaling, manual restoration, and recovery after forcibly terminating the app.
-
-We verified the Paper Cat blink frames for both the face and raised paw, the return to open eyes, and the click point. The text cursor can take over during a blink. Clicks in the Tipwink window trigger the desktop blink.
-
-In 0.4, we verified live desktop updates for theme, style, size, and color changes. During continuous adjustments, the median time per desktop update was about 18 ms for Paper Cat resizing and 25 ms for Two-Tone Arrow recoloring at 150% size. Rapid changes are grouped into a single update. Mouse clicks in other apps, macOS 27, multiple displays, full-screen mode, and browser-drawn cursors still need testing.
-
-The theme list takes inspiration from [MaCursor](https://writronic.com/macursor/), and the interactive preview from [CursorMagic](https://pocketgiant.co/software/cursormagic/). All cursor artwork is original to this project.
+Tipwink's cursor artwork is drawn in the project. Its theme library and interactive preview took inspiration from [MaCursor](https://writronic.com/macursor/) and [CursorMagic](https://pocketgiant.co/software/cursormagic/).
