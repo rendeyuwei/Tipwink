@@ -20,6 +20,10 @@ Tipwink restores the previous cursor when it quits normally. If the app exits un
 
 Preview settings are stored locally, and all theme assets ship with the app. Desktop cursor replacement uses private WindowServer interfaces. Apps that draw their own cursors, some system surfaces, and different macOS versions may behave differently. The current build is signed for local use. Public distribution requires Developer ID signing and notarization.
 
+## Updates
+
+Distribution builds check for updates in the background while Tipwink is running. Use **Check for Updates…** (检查更新…) from the app menu or the menu bar, or turn off **Automatically Check for Updates** (自动检查更新) there. Tipwink asks before installing a new version. Builds without an update feed show the current version in the check dialog. See [the release guide](docs/updates.md) for setup.
+
 ## Build from source
 
 Open [Tipwink.xcodeproj](Tipwink.xcodeproj) in Xcode 26 or later and run the **Tipwink** scheme. The app uses SwiftUI, AppKit, and Core Graphics. [WindowServer.swift](Sources/WindowServer.swift) and [DesktopThemeEngine.swift](Sources/DesktopThemeEngine.swift) handle reading, applying, and restoring system cursors. All three themes are drawn in [CursorTheme.swift](Sources/CursorTheme.swift).

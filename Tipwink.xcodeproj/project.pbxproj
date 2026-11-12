@@ -12,6 +12,7 @@
             hasScannedForEncodings = 0;
             knownRegions = ("zh-Hans", Base);
             mainGroup = D61200000000000000000002;
+            packageReferences = (D61200000000000000000016);
             preferredProjectObjectVersion = 77;
             productRefGroup = D61200000000000000000005;
             projectDirPath = "";
@@ -48,6 +49,7 @@
             dependencies = ();
             fileSystemSynchronizedGroups = (D61200000000000000000003);
             name = Tipwink;
+            packageProductDependencies = (D61200000000000000000017);
             productName = Tipwink;
             productReference = D61200000000000000000007;
             productType = "com.apple.product-type.application";
@@ -68,7 +70,7 @@
         D61200000000000000000009 = {
             isa = PBXFrameworksBuildPhase;
             buildActionMask = 2147483647;
-            files = ();
+            files = (D61200000000000000000018);
             runOnlyForDeploymentPostprocessing = 0;
         };
         D6120000000000000000000A = {
@@ -134,13 +136,13 @@
             buildSettings = {
                 CODE_SIGN_IDENTITY = "-";
                 CODE_SIGN_STYLE = Manual;
-                CURRENT_PROJECT_VERSION = 4;
+                CURRENT_PROJECT_VERSION = 5;
                 ENABLE_APP_SANDBOX = NO;
                 ENABLE_HARDENED_RUNTIME = YES;
                 GENERATE_INFOPLIST_FILE = NO;
                 INFOPLIST_FILE = Resources/Info.plist;
                 LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
-                MARKETING_VERSION = 0.4.0;
+                MARKETING_VERSION = 0.5.0;
                 PRODUCT_BUNDLE_IDENTIFIER = studio.papercursor.macos;
                 PRODUCT_MODULE_NAME = Tipwink;
                 PRODUCT_NAME = Tipwink;
@@ -155,13 +157,13 @@
             buildSettings = {
                 CODE_SIGN_IDENTITY = "-";
                 CODE_SIGN_STYLE = Manual;
-                CURRENT_PROJECT_VERSION = 4;
+                CURRENT_PROJECT_VERSION = 5;
                 ENABLE_APP_SANDBOX = NO;
                 ENABLE_HARDENED_RUNTIME = YES;
                 GENERATE_INFOPLIST_FILE = NO;
                 INFOPLIST_FILE = Resources/Info.plist;
                 LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
-                MARKETING_VERSION = 0.4.0;
+                MARKETING_VERSION = 0.5.0;
                 PRODUCT_BUNDLE_IDENTIFIER = studio.papercursor.macos;
                 PRODUCT_MODULE_NAME = Tipwink;
                 PRODUCT_NAME = Tipwink;
@@ -170,6 +172,20 @@
                 SWIFT_VERSION = 6.0;
             };
             name = Release;
+        };
+        D61200000000000000000016 = {
+            isa = XCRemoteSwiftPackageReference;
+            repositoryURL = "https://github.com/sparkle-project/Sparkle";
+            requirement = { kind = exactVersion; version = 2.10.1; };
+        };
+        D61200000000000000000017 = {
+            isa = XCSwiftPackageProductDependency;
+            package = D61200000000000000000016;
+            productName = Sparkle;
+        };
+        D61200000000000000000018 = {
+            isa = PBXBuildFile;
+            productRef = D61200000000000000000017;
         };
     };
     rootObject = D61200000000000000000001;

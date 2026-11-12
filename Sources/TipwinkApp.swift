@@ -118,6 +118,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
 struct TipwinkApp: App {
     @NSApplicationDelegateAdaptor(ApplicationDelegate.self) private var delegate
     @State private var library = ThemeLibrary.shared
+    @StateObject private var updates = SoftwareUpdates()
 
     var body: some Scene {
         Window("纸尖", id: "library") {
@@ -126,6 +127,9 @@ struct TipwinkApp: App {
         .defaultSize(width: 884, height: 565)
         .windowResizability(.contentMinSize)
         .commands {
+            CommandGroup(after: .appInfo) {
+                UpdateMenuItems(updates: updates)
+            }
             CommandMenu("光标") {
                 Button("应用主题") { library.apply() }
                     .keyboardShortcut(.return, modifiers: .command)
@@ -137,7 +141,7 @@ struct TipwinkApp: App {
         }
 
         MenuBarExtra("纸尖", systemImage: "cursorarrow.rays") {
-            LibraryMenu(library: library)
+            LibraryMenu(library: library, updates: updates)
         }
         .menuBarExtraStyle(.menu)
     }
@@ -146,6 +150,7 @@ struct TipwinkApp: App {
 private struct LibraryMenu: View {
     @Environment(\.openWindow) private var openWindow
     let library: ThemeLibrary
+    let updates: SoftwareUpdates
 
     var body: some View {
         Button("打开主题库") {
@@ -171,6 +176,8 @@ private struct LibraryMenu: View {
         Divider()
         Button("恢复原光标") { library.restore() }
             .disabled(library.applied == nil && !library.needsRecovery)
+        Divider()
+        UpdateMenuItems(updates: updates)
         Button("退出纸尖") { NSApp.terminate(nil) }
     }
 }

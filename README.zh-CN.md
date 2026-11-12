@@ -12,6 +12,10 @@
 
 预览设置保存在本机。主题库内置全部素材。系统级替换使用 WindowServer 私有接口，应用自绘指针、部分系统界面和不同 macOS 版本可能有差异。试用包为本机签名构建，公开分发需要 Developer ID 签名和公证。
 
+## 检查更新
+
+配置更新源的分发版会在运行时后台检查新版本。也可以从应用菜单或菜单栏点击「检查更新…」，或关掉「自动检查更新」。发现新版后，确认才会安装。未配置更新源的本地构建会在检查窗口显示当前版本。配置方式见[发布指南](docs/updates.md)。
+
 ## 开发
 
 用 Xcode 26 或更新版本打开 `Tipwink.xcodeproj`，选择 Tipwink scheme 运行。应用使用 SwiftUI、AppKit 和 Core Graphics。系统指针读写及恢复集中在 `WindowServer.swift` 和 `DesktopThemeEngine.swift`。三套光标使用 `CursorTheme.swift` 里的原创绘制代码。
