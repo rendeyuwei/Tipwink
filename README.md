@@ -1,21 +1,35 @@
-# 纸片光标 0.4
+# PaperCursor 0.4
 
-纸片光标是一个 macOS 原生主题库。窗口里可以对照指向、链接、文字三种光标，试点按钮、链接，选字和拖动。预览背景可以随时切到浅色或深色。纸片猫的「经典」样式采用初版比例和微笑表情，点击会眨眼。「纯猫」样式用左耳尖定位，移到链接上会抬爪。
+English · [简体中文](README.zh-CN.md)
 
-## 本机试用
+PaperCursor is a native macOS app for customizing your cursor. Switch between themes, adjust the size, and try each cursor on light or dark backgrounds before applying it to your desktop. The preview area lets you click buttons, hover over links, select text, and drag.
 
-1. 在 Apple Silicon Mac 的 macOS 26 或更新版本上打开「纸片光标」。
-2. 选择纸片猫、像素果冻或双色箭头。大小在 75% 到 150% 间可调。双色箭头可以改填充和描边。
-3. 点一次「应用到桌面」开启实时换肤。之后切换主题、样式、大小或双色配色，桌面都会跟着变。可从窗口或系统菜单栏恢复原光标，并回到窗口预览。正常退出会恢复应用前的光标。异常退出时，同一登录会话里的恢复进程会尝试还原，重开应用时也会检查恢复记录。
+Choose from three built-in themes:
 
-预览设置保存在本机。主题库内置全部素材。系统级替换使用 WindowServer 私有接口，应用自绘指针、部分系统界面和不同 macOS 版本可能有差异。试用包为本机签名构建，公开分发需要 Developer ID 签名和公证。
+- **Paper Cat (纸片猫):** The Classic style keeps the original proportions and smile, and the cat blinks when you click. Cat Only uses the tip of the left ear as the click point and raises a paw over links.
+- **Pixel Jelly (像素果冻):** A playful pixel art theme.
+- **Two-Tone Arrow (双色箭头):** An arrow with separate fill and outline colors.
 
-## 开发
+## Try it on your Mac
 
-用 Xcode 26 或更新版本打开 `PaperCursor.xcodeproj`，选择 PaperCursor scheme 运行。应用使用 SwiftUI、AppKit 和 Core Graphics。系统指针读写及恢复集中在 `WindowServer.swift` 和 `DesktopThemeEngine.swift`。三套光标使用 `CursorTheme.swift` 里的原创绘制代码。
+1. Open PaperCursor (纸片光标) on an Apple Silicon Mac running macOS 26 or later.
+2. Choose a theme and adjust its size from 75% to 150%. For Two-Tone Arrow, you can also change the fill and outline colors.
+3. Click **Apply to Desktop (应用到桌面)** to enable live theming. Changes to the theme, style, size, or colors take effect on the desktop as you make them. Restore the original cursor from the app window or menu bar to return to preview mode.
 
-## 验证范围
+PaperCursor restores the previous cursor when it quits normally. If the app exits unexpectedly, a recovery process in the same login session attempts to restore the cursor. The app also checks for a recovery record on its next launch.
 
-本机验证环境是 Apple Silicon 与 macOS 26.6.2。独立 App 请求箭头、手型和文本光标时，读取到三种主题图像的尺寸和热点。已验证大小调到 150%、一键恢复，以及强制结束进程后恢复试验前的图像。0.2 也验证了猫脸和抬爪的闭眼帧、睁眼恢复和点击位置，文字光标可在眨眼期间正常接管。窗口内的鼠标点击已触发桌面眨眼。0.4 已实测切换主题、样式、大小和配色的桌面更新。连续调整纸片猫大小和 150% 大小的双色配色时，单次桌面更新的中位耗时分别约 18 和 25 毫秒。频繁变化会合并成一次更新。其他 App 中的实际鼠标点击、macOS 27、多显示器、全屏和各浏览器的自绘光标仍需验证。
+Preview settings are stored locally, and all theme assets ship with the app. Desktop cursor replacement uses private WindowServer interfaces. Apps that draw their own cursors, some system surfaces, and different macOS versions may behave differently. The current build is signed for local use. Public distribution requires Developer ID signing and notarization.
 
-界面参考了 MaCursor 的主题列表和 CursorMagic 的可操作试用区。纸片猫、像素果冻与双色箭头的图形均在本工程内绘制。 [MaCursor](https://writronic.com/macursor/) · [CursorMagic](https://pocketgiant.co/software/cursormagic/)
+## Build from source
+
+Open [PaperCursor.xcodeproj](PaperCursor.xcodeproj) in Xcode 26 or later and run the **PaperCursor** scheme. The app uses SwiftUI, AppKit, and Core Graphics. [WindowServer.swift](Sources/WindowServer.swift) and [DesktopThemeEngine.swift](Sources/DesktopThemeEngine.swift) handle reading, applying, and restoring system cursors. All three themes are drawn in [CursorTheme.swift](Sources/CursorTheme.swift).
+
+## What we've verified
+
+On an Apple Silicon Mac running macOS 26.6.2, a separate test app confirmed the image sizes and hotspots of the arrow, pointing hand, and text cursors. We also verified 150% scaling, manual restoration, and recovery after forcibly terminating the app.
+
+We verified the Paper Cat blink frames for both the face and raised paw, the return to open eyes, and the click point. The text cursor can take over during a blink. Clicks in the PaperCursor window trigger the desktop blink.
+
+In 0.4, we verified live desktop updates for theme, style, size, and color changes. During continuous adjustments, the median time per desktop update was about 18 ms for Paper Cat resizing and 25 ms for Two-Tone Arrow recoloring at 150% size. Rapid changes are grouped into a single update. Mouse clicks in other apps, macOS 27, multiple displays, full-screen mode, and browser-drawn cursors still need testing.
+
+The theme list takes inspiration from [MaCursor](https://writronic.com/macursor/), and the interactive preview from [CursorMagic](https://pocketgiant.co/software/cursormagic/). All cursor artwork is original to this project.
