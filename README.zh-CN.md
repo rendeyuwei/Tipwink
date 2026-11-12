@@ -1,12 +1,12 @@
-# 纸片光标 0.4
+# 纸尖 · Tipwink
 
 [English](README.md) · 简体中文
 
-纸片光标是一个 macOS 原生主题库。窗口里可以对照指向、链接、文字三种光标，试点按钮、链接，选字和拖动。预览背景可以随时切到浅色或深色。纸片猫的「经典」样式采用初版比例和微笑表情，点击会眨眼。「纯猫」样式用左耳尖定位，移到链接上会抬爪。
+纸尖是一个 macOS 原生主题库。窗口里可以对照指向、链接、文字三种光标，试点按钮、链接，选字和拖动。预览背景可以随时切到浅色或深色。纸片猫的「经典」样式采用初版比例和微笑表情，点击会眨眼。「纯猫」样式用左耳尖定位，移到链接上会抬爪。
 
 ## 本机试用
 
-1. 在 Apple Silicon Mac 的 macOS 26 或更新版本上打开「纸片光标」。
+1. 在 Apple Silicon Mac 的 macOS 26 或更新版本上打开「纸尖」。
 2. 选择纸片猫、像素果冻或双色箭头。大小在 75% 到 150% 间可调。双色箭头可以改填充和描边。
 3. 点一次「应用到桌面」开启实时换肤。之后切换主题、样式、大小或双色配色，桌面都会跟着变。可从窗口或系统菜单栏恢复原光标，并回到窗口预览。正常退出会恢复应用前的光标。异常退出时，同一登录会话里的恢复进程会尝试还原，重开应用时也会检查恢复记录。
 
@@ -14,7 +14,7 @@
 
 ## 开发
 
-用 Xcode 26 或更新版本打开 `PaperCursor.xcodeproj`，选择 PaperCursor scheme 运行。应用使用 SwiftUI、AppKit 和 Core Graphics。系统指针读写及恢复集中在 `WindowServer.swift` 和 `DesktopThemeEngine.swift`。三套光标使用 `CursorTheme.swift` 里的原创绘制代码。
+用 Xcode 26 或更新版本打开 `Tipwink.xcodeproj`，选择 Tipwink scheme 运行。应用使用 SwiftUI、AppKit 和 Core Graphics。系统指针读写及恢复集中在 `WindowServer.swift` 和 `DesktopThemeEngine.swift`。三套光标使用 `CursorTheme.swift` 里的原创绘制代码。
 
 ## 验证范围
 

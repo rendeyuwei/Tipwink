@@ -42,7 +42,7 @@ enum DesktopCursorError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unavailable: "当前 macOS 上暂时无法应用桌面主题。你仍可在窗口内试用。"
-        case .busy: "另一个纸片光标进程正在处理恢复，请稍后重试。"
+        case .busy: "另一个纸尖进程正在处理恢复，请稍后重试。"
         case .artwork: "指针图像未能生成，请重试。"
         case .recoveryData: "原光标的恢复记录无法读取，桌面主题已暂停应用。"
         case .restoreRequired: "主题未能完整应用，请先恢复原光标。"

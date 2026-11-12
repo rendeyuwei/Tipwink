@@ -47,8 +47,8 @@
             buildRules = ();
             dependencies = ();
             fileSystemSynchronizedGroups = (D61200000000000000000003);
-            name = PaperCursor;
-            productName = PaperCursor;
+            name = Tipwink;
+            productName = Tipwink;
             productReference = D61200000000000000000007;
             productType = "com.apple.product-type.application";
         };
@@ -56,7 +56,7 @@
             isa = PBXFileReference;
             explicitFileType = wrapper.application;
             includeInIndex = 0;
-            path = "纸片光标.app";
+            path = Tipwink.app;
             sourceTree = BUILT_PRODUCTS_DIR;
         };
         D61200000000000000000008 = {
@@ -90,7 +90,7 @@
         D6120000000000000000000D = {
             isa = PBXFileReference;
             lastKnownFileType = image.icns;
-            path = PaperCursor.icns;
+            path = Tipwink.icns;
             sourceTree = "<group>";
         };
         D61200000000000000000010 = {
@@ -142,8 +142,8 @@
                 LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
                 MARKETING_VERSION = 0.4.0;
                 PRODUCT_BUNDLE_IDENTIFIER = studio.papercursor.macos;
-                PRODUCT_MODULE_NAME = PaperCursor;
-                PRODUCT_NAME = "纸片光标";
+                PRODUCT_MODULE_NAME = Tipwink;
+                PRODUCT_NAME = Tipwink;
                 SWIFT_APPROACHABLE_CONCURRENCY = YES;
                 SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
                 SWIFT_VERSION = 6.0;
@@ -163,8 +163,8 @@
                 LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
                 MARKETING_VERSION = 0.4.0;
                 PRODUCT_BUNDLE_IDENTIFIER = studio.papercursor.macos;
-                PRODUCT_MODULE_NAME = PaperCursor;
-                PRODUCT_NAME = "纸片光标";
+                PRODUCT_MODULE_NAME = Tipwink;
+                PRODUCT_NAME = Tipwink;
                 SWIFT_APPROACHABLE_CONCURRENCY = YES;
                 SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
                 SWIFT_VERSION = 6.0;

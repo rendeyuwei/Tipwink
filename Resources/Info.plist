@@ -5,9 +5,9 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>zh_CN</string>
     <key>CFBundleDisplayName</key>
-    <string>纸片光标</string>
+    <string>纸尖</string>
     <key>CFBundleName</key>
-    <string>纸片光标</string>
+    <string>$(PRODUCT_NAME)</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -21,7 +21,7 @@
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>CFBundleIconFile</key>
-    <string>PaperCursor.icns</string>
+    <string>Tipwink.icns</string>
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.utilities</string>
     <key>LSMinimumSystemVersion</key>

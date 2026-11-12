@@ -6,5 +6,5 @@ if arguments.first == "--restore-on-owner-exit" {
         DesktopThemeEngine.restoreAfterOwnerExit(owner: owner)
     }
 } else {
-    PaperCursorApp.main()
+    TipwinkApp.main()
 }

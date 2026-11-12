@@ -220,7 +220,7 @@ final class DesktopThemeEngine {
             guard (try? engine.readRecovery().owner) == owner else { return }
             try engine.restore()
         } catch {
-            fputs("PaperCursor recovery will be retried on the next launch.\n", stderr)
+            fputs("Tipwink recovery will be retried on the next launch.\n", stderr)
         }
     }
 

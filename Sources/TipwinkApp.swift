@@ -115,12 +115,12 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-struct PaperCursorApp: App {
+struct TipwinkApp: App {
     @NSApplicationDelegateAdaptor(ApplicationDelegate.self) private var delegate
     @State private var library = ThemeLibrary.shared
 
     var body: some Scene {
-        Window("纸片光标", id: "library") {
+        Window("纸尖", id: "library") {
             LibraryView(library: library)
         }
         .defaultSize(width: 884, height: 565)
@@ -136,7 +136,7 @@ struct PaperCursorApp: App {
             }
         }
 
-        MenuBarExtra("纸片光标", systemImage: "cursorarrow.rays") {
+        MenuBarExtra("纸尖", systemImage: "cursorarrow.rays") {
             LibraryMenu(library: library)
         }
         .menuBarExtraStyle(.menu)
@@ -171,6 +171,6 @@ private struct LibraryMenu: View {
         Divider()
         Button("恢复原光标") { library.restore() }
             .disabled(library.applied == nil && !library.needsRecovery)
-        Button("退出纸片光标") { NSApp.terminate(nil) }
+        Button("退出纸尖") { NSApp.terminate(nil) }
     }
 }
