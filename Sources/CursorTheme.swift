@@ -7,6 +7,8 @@ enum CursorRole: String, CaseIterable {
     case text
 
     static let catEar = CGPoint(x: 6, y: 5)
+    static let ghostTip = CGPoint(x: 6, y: 5)
+    static let crosshairCenter = CGPoint(x: 16, y: 18)
 
     var title: String {
         switch self {
@@ -57,6 +59,9 @@ enum CursorTheme: String, CaseIterable, Identifiable, Codable {
     case paperCat
     case pixelJelly
     case twoTone
+    case paperPlane
+    case gummyGhost
+    case nightCrosshair
 
     var id: Self { self }
 
@@ -65,6 +70,9 @@ enum CursorTheme: String, CaseIterable, Identifiable, Codable {
         case .paperCat: "纸片猫"
         case .pixelJelly: "像素果冻"
         case .twoTone: "双色箭头"
+        case .paperPlane: "纸飞机"
+        case .gummyGhost: "软糖幽灵"
+        case .nightCrosshair: "夜光准星"
         }
     }
 
@@ -73,6 +81,9 @@ enum CursorTheme: String, CaseIterable, Identifiable, Codable {
         case .paperCat: PaperCatStyle.classic.detail
         case .pixelJelly: "葡萄紫和薄荷绿，像一颗小小的像素糖。"
         case .twoTone: "自由搭配填充和描边，做一套日常指针。"
+        case .paperPlane: "冰蓝色的折纸机翼，用机鼻指向。"
+        case .gummyGhost: "用左上角的小尖定位，移到链接上会抬手。"
+        case .nightCrosshair: "薄荷绿的刻线围出中心点，方便精确对位。"
         }
     }
 
@@ -81,6 +92,9 @@ enum CursorTheme: String, CaseIterable, Identifiable, Codable {
         case .paperCat: Color(red: 0.99, green: 0.88, blue: 0.78)
         case .pixelJelly: Color(red: 0.88, green: 0.84, blue: 1)
         case .twoTone: Color(red: 0.81, green: 0.90, blue: 0.88)
+        case .paperPlane: Color(red: 0.79, green: 0.88, blue: 0.98)
+        case .gummyGhost: Color(red: 0.93, green: 0.86, blue: 0.94)
+        case .nightCrosshair: Color(red: 0.15, green: 0.23, blue: 0.29)
         }
     }
 }
@@ -121,8 +135,12 @@ struct ThemeSettings: Codable, Equatable {
     }
 
     func hotSpot(for role: CursorRole) -> CGPoint {
-        let usesEar = theme == .paperCat && paperCatStyle == .catOnly && role == .arrow
-        let base = usesEar ? CursorRole.catEar : role.hotSpot
+        let base = switch (theme, role) {
+        case (.paperCat, .arrow) where paperCatStyle == .catOnly: CursorRole.catEar
+        case (.gummyGhost, .arrow): CursorRole.ghostTip
+        case (.nightCrosshair, .arrow): CursorRole.crosshairCenter
+        default: role.hotSpot
+        }
         return CGPoint(x: base.x * imageSize.width / 32, y: base.y * imageSize.height / 36)
     }
 
@@ -130,7 +148,7 @@ struct ThemeSettings: Codable, Equatable {
         guard theme == other.theme, scale == other.scale else { return false }
         switch theme {
         case .paperCat: return paperCatStyle == other.paperCatStyle
-        case .pixelJelly: return true
+        case .pixelJelly, .paperPlane, .gummyGhost, .nightCrosshair: return true
         case .twoTone: return fill == other.fill && outline == other.outline
         }
     }
@@ -269,6 +287,12 @@ enum CursorArtwork {
             case .text: beam
             }
             paint(shape, fill: settings.fill, stroke: settings.outline, width: 2, in: context)
+        case .paperPlane:
+            drawPaperPlane(role, in: context)
+        case .gummyGhost:
+            drawGummyGhost(role, in: context)
+        case .nightCrosshair:
+            drawNightCrosshair(role, in: context)
         }
     }
 
@@ -440,5 +464,195 @@ enum CursorArtwork {
     private static func dot(_ x: CGFloat, _ y: CGFloat, _ size: CGFloat, color: RGB, in context: CGContext) {
         context.setFillColor(color.cgColor)
         context.fillEllipse(in: CGRect(x: x - size / 2, y: y - size / 2, width: size, height: size))
+    }
+}
+
+private extension CursorArtwork {
+    static let planeFold = CGPoint(x: 20.2, y: 17.2)
+    static let planeTail = CGPoint(x: 17.0, y: 28.6)
+    static let planeValley = CGPoint(x: 13.9, y: 21)
+    static let planeLeftWing = CGPoint(x: 10.2, y: 24.9)
+    static let plane = path {
+        $0.addLines(between: [
+            CursorRole.arrow.hotSpot, CGPoint(x: 28.8, y: 13.8),
+            planeFold, planeTail, planeValley, planeLeftWing
+        ])
+        $0.closeSubpath()
+    }
+    static let planeUnderside = path {
+        $0.addLines(between: [CursorRole.arrow.hotSpot, planeFold, planeTail, planeValley])
+        $0.closeSubpath()
+    }
+    static let planeNearWing = path {
+        $0.addLines(between: [CursorRole.arrow.hotSpot, planeValley, planeLeftWing])
+        $0.closeSubpath()
+    }
+
+    static func drawPaperPlane(_ role: CursorRole, in context: CGContext) {
+        let ink = RGB(0x253653)
+        let paper = RGB(0xF0FAFF)
+        let sky = RGB(0x90CDF3)
+        switch role {
+        case .arrow:
+            paint(plane, fill: paper, stroke: RGB(0xFFFFFF), width: 4, in: context)
+            context.setFillColor(sky.cgColor)
+            context.addPath(planeUnderside)
+            context.fillPath()
+            context.setFillColor(RGB(0xC6E8FB).cgColor)
+            context.addPath(planeNearWing)
+            context.fillPath()
+            context.setLineJoin(.round)
+            stroke(plane, color: ink, width: 1.55, in: context)
+            let crease = path {
+                $0.addLines(between: [CursorRole.arrow.hotSpot, planeFold])
+            }
+            stroke(crease, color: RGB(0x49749D), width: 1.2, in: context)
+        case .link:
+            paint(hand, fill: paper, stroke: RGB(0xFFFFFF), width: 4, in: context)
+            paint(hand, fill: paper, stroke: ink, width: 1.55, in: context)
+            let fold = path {
+                $0.addLines(between: [
+                    CGPoint(x: 13.6, y: 19.4), CGPoint(x: 23.6, y: 21.2),
+                    CGPoint(x: 18.4, y: 23), CGPoint(x: 16.6, y: 26.4)
+                ])
+                $0.closeSubpath()
+            }
+            paint(fold, fill: sky, stroke: RGB(0x49749D), width: 0.9, in: context)
+        case .text:
+            paint(beam, fill: ink, stroke: paper, width: 2.5, in: context)
+            drawBeamCaps(sky, in: context)
+        }
+    }
+
+    static let ghostInk = RGB(0x3C2D60)
+    static let ghostLilac = RGB(0xDCD2FF)
+    static let ghostPaper = RGB(0xFFFAFF)
+    static let ghostBody = path {
+        $0.move(to: CursorRole.ghostTip)
+        $0.addQuadCurve(to: CGPoint(x: 9.8, y: 6.6), control: CGPoint(x: 8.3, y: 4.5))
+        $0.addCurve(to: CGPoint(x: 25.6, y: 16), control1: CGPoint(x: 19.6, y: 1.9),
+                    control2: CGPoint(x: 26, y: 8.8))
+        $0.addCurve(to: CGPoint(x: 27, y: 25.6), control1: CGPoint(x: 25.4, y: 21.1),
+                    control2: CGPoint(x: 27.5, y: 23.1))
+        $0.addQuadCurve(to: CGPoint(x: 22.2, y: 28.5), control: CGPoint(x: 26.5, y: 30.7))
+        $0.addQuadCurve(to: CGPoint(x: 18.2, y: 29), control: CGPoint(x: 19.9, y: 27.1))
+        $0.addQuadCurve(to: CGPoint(x: 14.2, y: 29.6), control: CGPoint(x: 16.1, y: 31.9))
+        $0.addQuadCurve(to: CGPoint(x: 10.1, y: 28.7), control: CGPoint(x: 12.4, y: 27.4))
+        $0.addCurve(to: CGPoint(x: 5, y: 26.2), control1: CGPoint(x: 7.1, y: 30.8),
+                    control2: CGPoint(x: 4.2, y: 29.5))
+        $0.addQuadCurve(to: CGPoint(x: 6.7, y: 17.3), control: CGPoint(x: 6.1, y: 22.1))
+        $0.addQuadCurve(to: CursorRole.ghostTip, control: CGPoint(x: 7.6, y: 9.8))
+        $0.closeSubpath()
+    }
+    static let ghostWave = path {
+        $0.move(to: CursorRole.link.hotSpot)
+        $0.addQuadCurve(to: CGPoint(x: 14.1, y: 6.4), control: CGPoint(x: 14.2, y: 4.1))
+        $0.addLine(to: CGPoint(x: 14, y: 10.3))
+        $0.addQuadCurve(to: CGPoint(x: 17.3, y: 9.4), control: CGPoint(x: 15.7, y: 7.3))
+        $0.addQuadCurve(to: CGPoint(x: 15.7, y: 16.2), control: CGPoint(x: 18.4, y: 12.5))
+        $0.addQuadCurve(to: CGPoint(x: 9.2, y: 15.1), control: CGPoint(x: 12.8, y: 19.3))
+        $0.addQuadCurve(to: CGPoint(x: 7.2, y: 10.4), control: CGPoint(x: 6.6, y: 12.4))
+        $0.addQuadCurve(to: CGPoint(x: 10, y: 11.4), control: CGPoint(x: 8.6, y: 9.3))
+        $0.addLine(to: CGPoint(x: 10, y: 6.5))
+        $0.addQuadCurve(to: CursorRole.link.hotSpot, control: CGPoint(x: 10, y: 4.2))
+        $0.closeSubpath()
+    }
+
+    static func drawGummyGhost(_ role: CursorRole, in context: CGContext) {
+        switch role {
+        case .arrow:
+            drawGhostFace(in: context)
+        case .link:
+            context.saveGState()
+            context.translateBy(x: 5, y: 9)
+            context.scaleBy(x: 0.8, y: 0.8)
+            drawGhostFace(in: context)
+            context.restoreGState()
+            paint(ghostWave, fill: ghostLilac, stroke: ghostPaper, width: 3.8, in: context)
+            paint(ghostWave, fill: ghostLilac, stroke: ghostInk, width: 1.5, in: context)
+            dot(12.4, 13.6, 2.6, color: RGB(0xB09BEE), in: context)
+        case .text:
+            paint(beam, fill: ghostInk, stroke: ghostPaper, width: 2.5, in: context)
+            drawBeamCaps(ghostLilac, in: context)
+        }
+    }
+
+    static func drawGhostFace(in context: CGContext) {
+        paint(ghostBody, fill: ghostLilac, stroke: ghostPaper, width: 4.2, in: context)
+        context.saveGState()
+        context.addPath(ghostBody)
+        context.clip()
+        let shadow = path {
+            $0.move(to: CGPoint(x: 4, y: 26.5))
+            $0.addQuadCurve(to: CGPoint(x: 28, y: 22.2), control: CGPoint(x: 15, y: 29.4))
+            $0.addLine(to: CGPoint(x: 28, y: 32))
+            $0.addLine(to: CGPoint(x: 4, y: 32))
+            $0.closeSubpath()
+        }
+        context.setFillColor(RGB(0xB49FF0).cgColor)
+        context.addPath(shadow)
+        context.fillPath()
+        context.restoreGState()
+        stroke(ghostBody, color: ghostInk, width: 1.55, in: context)
+        let shine = path {
+            $0.move(to: CGPoint(x: 13.9, y: 9.6))
+            $0.addQuadCurve(to: CGPoint(x: 20.4, y: 10.6), control: CGPoint(x: 17.6, y: 7.5))
+        }
+        stroke(shine, color: ghostPaper, width: 1.6, in: context)
+        context.setFillColor(ghostInk.cgColor)
+        context.fillEllipse(in: CGRect(x: 12.3, y: 14.9, width: 1.9, height: 2.8))
+        context.fillEllipse(in: CGRect(x: 19.1, y: 14.5, width: 1.9, height: 2.8))
+        dot(11.2, 19.4, 2.6, color: RGB(0xF8A6C2), in: context)
+        dot(22, 18.9, 2.6, color: RGB(0xF8A6C2), in: context)
+        let smile = path {
+            $0.move(to: CGPoint(x: 15.5, y: 18.4))
+            $0.addQuadCurve(to: CGPoint(x: 18.2, y: 18.2), control: CGPoint(x: 17, y: 20.4))
+        }
+        stroke(smile, color: ghostInk, width: 0.95, in: context)
+    }
+
+    static let crosshair = path {
+        let center = CursorRole.crosshairCenter
+        for direction in [-1.0, 1.0] {
+            let inner = 5.2 * direction
+            let outer = 12.4 * direction
+            $0.move(to: CGPoint(x: center.x + inner, y: center.y))
+            $0.addLine(to: CGPoint(x: center.x + outer, y: center.y))
+            $0.move(to: CGPoint(x: center.x, y: center.y + inner))
+            $0.addLine(to: CGPoint(x: center.x, y: center.y + outer))
+        }
+    }
+
+    static func drawNightCrosshair(_ role: CursorRole, in context: CGContext) {
+        let ink = RGB(0x102431)
+        let mint = RGB(0xACFBE3)
+        switch role {
+        case .arrow:
+            stroke(crosshair, color: ink, width: 5, in: context)
+            stroke(crosshair, color: mint, width: 2.1, in: context)
+            let center = CursorRole.crosshairCenter
+            dot(center.x, center.y, 3.9, color: ink, in: context)
+            dot(center.x, center.y, 1.95, color: mint, in: context)
+        case .link:
+            paint(hand, fill: ink, stroke: ink, width: 3.9, in: context)
+            paint(hand, fill: ink, stroke: mint, width: 1.6, in: context)
+            let palmMark = path {
+                $0.addLines(between: [CGPoint(x: 16, y: 22), CGPoint(x: 22, y: 22)])
+                $0.move(to: CGPoint(x: 19, y: 19))
+                $0.addLine(to: CGPoint(x: 19, y: 25))
+            }
+            stroke(palmMark, color: mint, width: 1.55, in: context)
+        case .text:
+            paint(beam, fill: mint, stroke: ink, width: 2.4, in: context)
+        }
+    }
+
+    static func drawBeamCaps(_ color: RGB, in context: CGContext) {
+        let caps = path {
+            $0.addLines(between: [CGPoint(x: 11.6, y: 7.75), CGPoint(x: 20.4, y: 7.75)])
+            $0.move(to: CGPoint(x: 11.6, y: 28.25))
+            $0.addLine(to: CGPoint(x: 20.4, y: 28.25))
+        }
+        stroke(caps, color: color, width: 1.5, in: context)
     }
 }

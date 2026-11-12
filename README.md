@@ -4,11 +4,14 @@ English · [简体中文](README.zh-CN.md)
 
 Tipwink is a native macOS app for customizing your cursor. Switch between themes, adjust the size, and try each cursor on light or dark backgrounds before applying it to your desktop. The preview area lets you click buttons, hover over links, select text, and drag.
 
-Choose from three built-in themes:
+Choose from six built-in themes.
 
 - **Paper Cat (纸片猫):** The Classic style keeps the original proportions and smile, and the cat blinks when you click. Cat Only uses the tip of the left ear as the click point and raises a paw over links.
 - **Pixel Jelly (像素果冻):** A playful pixel art theme.
 - **Two-Tone Arrow (双色箭头):** An arrow with separate fill and outline colors.
+- **Paper Plane (纸飞机)** points with its folded nose.
+- **Gummy Ghost (软糖幽灵)** points with the tip of its hood and raises a hand over links.
+- **Night Crosshair (夜光准星)** uses mint ticks around a center point for precise positioning.
 
 ## Try it on your Mac
 
@@ -26,7 +29,7 @@ Distribution builds check for updates in the background while Tipwink is running
 
 ## Build from source
 
-Open [Tipwink.xcodeproj](Tipwink.xcodeproj) in Xcode 26 or later and run the **Tipwink** scheme. The app uses SwiftUI, AppKit, and Core Graphics. [WindowServer.swift](Sources/WindowServer.swift) and [DesktopThemeEngine.swift](Sources/DesktopThemeEngine.swift) handle reading, applying, and restoring system cursors. All three themes are drawn in [CursorTheme.swift](Sources/CursorTheme.swift).
+Open [Tipwink.xcodeproj](Tipwink.xcodeproj) in Xcode 26 or later and run the **Tipwink** scheme. The app uses SwiftUI, AppKit, and Core Graphics. [WindowServer.swift](Sources/WindowServer.swift) and [DesktopThemeEngine.swift](Sources/DesktopThemeEngine.swift) handle reading, applying, and restoring system cursors. All six themes are drawn in [CursorTheme.swift](Sources/CursorTheme.swift).
 
 ## What we've verified
 

@@ -6,27 +6,17 @@ Tipwink uses [Sparkle](https://sparkle-project.org/documentation/) to read an HT
 
 The pilot uses a dedicated Alibaba Cloud OSS bucket in Hong Kong and its built-in HTTPS endpoint. The bucket is private. Its policy allows HTTPS reads for the appcast and versioned ZIP files at the pilot path. Anyone with one of those links can read that file. Listing and writing still require authorization.
 
-The local, ignored `.tipwink-pilot.json` records the bucket, endpoint, path, region, and Alibaba Cloud CLI profile. The Sparkle private key is in the login keychain under account `tipwink`. Retrieve the public key with `bin/generate_keys --account tipwink -p`. The initial 0.5.1 pilot build and subsequent pilot updates use the same Apple Development team and Sparkle key.
+On the release Mac, increase `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project. From the checkout root, run one command. The notes are optional and appear in the update dialog.
 
-1. Increment `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`. Build the Release configuration with the existing Apple Development certificate and team. Set `TIPWINK_UPDATE_PUBLIC_KEY` to the Sparkle public key and `TIPWINK_APPCAST_URL` to the existing pilot URL, `https://<bucket>.<endpoint>/<prefix>/appcast.xml`.
-2. Run `codesign --verify --deep --strict` on the app and package it with `ditto -c -k --keepParent`. Name the ZIP `Tipwink-<version>-macOS-arm64.zip`. Generate the signed appcast as described below, using the pilot URL with the final `appcast.xml` removed as the download prefix.
-3. Upload the ZIP first, then download it from its HTTPS URL and compare it with the local file. Use the settings in `.tipwink-pilot.json` for the variables in the command below.
+```sh
+./scripts/release-pilot --notes "Added three cursor themes."
+```
 
-   ```sh
-   aliyun ossutil api put-object --profile "$OSS_PROFILE" --region "$OSS_REGION" \
-     --endpoint "$OSS_ENDPOINT" --bucket "$OSS_BUCKET" --key "$OSS_PREFIX/$ZIP_NAME" \
-     --body "file://$ZIP_PATH" --forbid-overwrite --content-type application/zip \
-     --cache-control 'public,max-age=31536000,immutable'
-   ```
+The command builds and code signs the app, signs and verifies the ZIP and appcast with Sparkle, and compares the ZIP downloaded from OSS to the local file. It uploads the appcast last and verifies the bytes served over HTTPS. Versioned ZIPs use overwrite protection. Git pushes update the source repository.
 
-4. Upload the signed appcast last. Confirm that the live feed matches the signed file, then check and install from the previous pilot version.
+The ignored `.tipwink-pilot.json` records `bucket`, `endpoint`, `prefix`, `region`, and `profile` for the existing OSS channel. It also contains `development_team` for Apple Development signing, `sparkle_bin` for the Sparkle tool directory, and `sparkle_public_key` for the public key already embedded in the pilot app. The private key stays in the login Keychain under account `tipwink`. macOS may ask for Keychain access during signing or verification. The release Mac needs Xcode, Python 3, the Sparkle tools, and an active Alibaba Cloud CLI login for the configured profile.
 
-   ```sh
-   aliyun ossutil api put-object --profile "$OSS_PROFILE" --region "$OSS_REGION" \
-     --endpoint "$OSS_ENDPOINT" --bucket "$OSS_BUCKET" --key "$OSS_PREFIX/appcast.xml" \
-     --body "file://$APPCAST_PATH" --content-type application/xml \
-     --cache-control 'no-cache,max-age=0,must-revalidate'
-   ```
+The script prints the path to the signed files under `.build/tipwink-pilot/releases`. If the network fails after staging, retry those same files with `./scripts/release-pilot --resume <staged-directory>`. To change the contents of a staged release, increment the version and build number.
 
 For distribution to other Mac users, build a Developer ID signed and notarized version and use a separate release feed.
 

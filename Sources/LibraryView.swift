@@ -51,10 +51,13 @@ struct LibraryView: View {
                 .padding(.bottom, 5)
                 .accessibilityAddTraits(.isHeader)
 
-            ForEach(CursorTheme.allCases) { theme in
-                themeRow(theme)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(CursorTheme.allCases) { theme in
+                        themeRow(theme)
+                    }
+                }
             }
-            Spacer(minLength: 20)
             desktopStatus
         }
         .padding(.horizontal, 16)

@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+"""Build and publish a signed Tipwink update from the release Mac."""
+
+import argparse
+import base64
+import fcntl
+import filecmp
+import json
+import plistlib
+import re
+import subprocess
+import sys
+import tempfile
+import xml.etree.ElementTree as ET
+from dataclasses import dataclass
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+STATE = ROOT / ".build" / "tipwink-pilot"
+ACCOUNT = "tipwink"
+SPARKLE = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
+
+
+class ReleaseError(Exception):
+    pass
+
+
+def require(condition, message):
+    if not condition:
+        raise ReleaseError(message)
+
+
+def run(label, *command, capture=False):
+    result = subprocess.run(
+        [str(arg) for arg in command],
+        cwd=ROOT,
+        stdout=subprocess.PIPE if capture else None,
+        text=True,
+        check=False,
+    )
+    require(result.returncode == 0, f"{label} failed (exit {result.returncode}).")
+    return result.stdout.strip() if capture else None
+
+
+def report(message):
+    print(message, flush=True)
+
+
+def read_config():
+    path = ROOT / ".tipwink-pilot.json"
+    require(path.is_file(), "Missing .tipwink-pilot.json. See docs/updates.md.")
+    config = json.loads(path.read_text(encoding="utf-8"))
+    require(isinstance(config, dict), f"{path.name} must contain a JSON object.")
+    for key in ("bucket", "endpoint", "prefix", "profile", "region", "development_team", "sparkle_bin", "sparkle_public_key"):
+        require(isinstance(config.get(key), str) and config[key], f"Missing {key} in {path.name}.")
+    require(re.fullmatch(r"[a-z0-9][a-z0-9-]{1,61}[a-z0-9]", config["bucket"]), "Invalid OSS bucket name.")
+    require(re.fullmatch(r"[a-z0-9-]+", config["region"]), "Invalid OSS region.")
+    require(config["endpoint"] == f"oss-{config['region']}.aliyuncs.com", "The endpoint must match the OSS region.")
+    require(re.fullmatch(r"pilot/[a-zA-Z0-9_-]+", config["prefix"]), "Expected a path within the pilot channel.")
+    require(re.fullmatch(r"[A-Z0-9]{10}", config["development_team"]), "Invalid Apple Development team ID.")
+    return config
+
+
+@dataclass(frozen=True)
+class Update:
+    version: str
+    build: int
+    url: str
+    signature: str
+    length: int
+
+    @property
+    def zip_name(self):
+        return f"Tipwink-{self.version}-macOS-arm64.zip"
+
+
+def version_parts(version):
+    require(re.fullmatch(r"\d+\.\d+(?:\.\d+)?", version or ""), "Expected a numeric version such as 0.6.0.")
+    parts = tuple(int(part) for part in version.split("."))
+    return parts + (0,) * (3 - len(parts))
+
+
+def read_update(feed):
+    channel = ET.parse(feed).getroot().find("channel")
+    require(channel is not None, "The appcast has no channel.")
+    items = channel.findall("item")
+    require(len(items) == 1, "The pilot appcast must contain exactly one update.")
+    item = items[0]
+    enclosure = item.find("enclosure")
+    require(enclosure is not None, "The appcast has no update archive.")
+    version = item.findtext(f"{SPARKLE}shortVersionString")
+    version_parts(version)
+    build = int(item.findtext(f"{SPARKLE}version", default="0"))
+    require(build > 0, "The appcast has no valid build number.")
+    signature = enclosure.get(f"{SPARKLE}edSignature", "")
+    require(len(base64.b64decode(signature, validate=True)) == 64, "The appcast has no valid archive signature.")
+    return Update(version, build, enclosure.get("url", ""), signature, int(enclosure.get("length", "0")))
+
+
+def fetch(url, destination, *, missing_ok=False):
+    status = run(
+        "HTTPS download", "curl", "--silent", "--show-error", "--proto", "=https",
+        "--connect-timeout", "10", "--max-time", "120",
+        "--output", destination, "--write-out", "%{http_code}", url, capture=True,
+    )
+    if missing_ok and status in ("403", "404"):
+        return False
+    require(status == "200", f"The pilot endpoint returned HTTP {status}.")
+    return True
+
+
+def put(config, file, media_type, cache_control, *, immutable=False):
+    command = [
+        "aliyun", "ossutil", "api", "put-object",
+        "--profile", config["profile"], "--region", config["region"],
+        "--endpoint", config["endpoint"], "--bucket", config["bucket"],
+        "--key", f"{config['prefix']}/{file.name}", "--body", f"file://{file}",
+        "--content-type", media_type, "--cache-control", cache_control, "--retry-times", "1",
+    ]
+    if immutable:
+        command.append("--forbid-overwrite")
+    run(f"OSS upload of {file.name}", *command, capture=True)
+
+
+def assert_newer(version, build, current):
+    require(
+        build > current.build and version_parts(version) > version_parts(current.version),
+        f"The pilot is already on {current.version} ({current.build}). Increase both version and build number.",
+    )
+
+
+def build_release(config, base, public_key, tools, current, notes):
+    report("Building the Apple Development signed Release configuration.")
+    products = STATE / "products"
+    run(
+        "Tipwink build", "xcodebuild", "-quiet", "-project", "Tipwink.xcodeproj",
+        "-scheme", "Tipwink", "-configuration", "Release", "-destination", "platform=macOS,arch=arm64",
+        "-derivedDataPath", STATE / "derived-data", "-packageCachePath", STATE / "package-cache",
+        "-onlyUsePackageVersionsFromResolvedFile", "-skipPackageUpdates",
+        f"CONFIGURATION_BUILD_DIR={products}", "CODE_SIGN_IDENTITY=Apple Development",
+        f"DEVELOPMENT_TEAM={config['development_team']}", f"TIPWINK_APPCAST_URL={base}/appcast.xml",
+        f"TIPWINK_UPDATE_PUBLIC_KEY={public_key}", "build",
+    )
+    with tempfile.TemporaryDirectory(prefix="tipwink-sign-") as tmp:
+        app = Path(tmp) / "Tipwink.app"
+        run("Copy for packaging", "ditto", "--norsrc", "--noextattr", "--noqtn", products / app.name, app)
+        run("Apple code signature verification", "codesign", "--verify", "--deep", "--strict", app)
+        info = plistlib.loads((app / "Contents" / "Info.plist").read_bytes())
+        require(info.get("CFBundleIdentifier") == "studio.papercursor.macos", "Unexpected app bundle identifier.")
+        require(info.get("SUFeedURL") == f"{base}/appcast.xml", "The build does not contain the pilot appcast URL.")
+        require(info.get("SUPublicEDKey") == public_key and info.get("SURequireSignedFeed"), "The build has incorrect signing settings.")
+        version = info["CFBundleShortVersionString"]
+        build = int(info["CFBundleVersion"])
+        assert_newer(version, build, current)
+        releases = STATE / "releases"
+        releases.mkdir(exist_ok=True)
+        stage = releases / f"{version}-{build}"
+        require(
+            not stage.exists(),
+            f"This release is already staged. Use scripts/release-pilot --resume '{stage.relative_to(ROOT)}' to publish those signed files.",
+        )
+        with tempfile.TemporaryDirectory(prefix=".signing-", dir=releases) as draft_path:
+            draft = Path(draft_path)
+            archive = draft / f"Tipwink-{version}-macOS-arm64.zip"
+            run("ZIP packaging", "ditto", "-c", "-k", "--norsrc", "--keepParent", app, archive)
+            if notes:
+                archive.with_suffix(".md").write_text(notes.strip() + "\n", encoding="utf-8")
+            report(f"Signing {version} ({build}) with the Keychain item {ACCOUNT}.")
+            run(
+                "Sparkle signing", tools / "generate_appcast", "--account", ACCOUNT,
+                "--maximum-deltas", "0", "--embed-release-notes", "--download-url-prefix", f"{base}/", draft,
+            )
+            update = read_update(draft / "appcast.xml")
+            require((update.version, update.build) == (version, build), "The appcast version does not match the build.")
+            draft.rename(stage)
+        return stage
+
+
+def publish(config, base, stage, old_feed, tools):
+    feed = stage / "appcast.xml"
+    update = read_update(feed)
+    archive = stage / update.zip_name
+    require(update.url == f"{base}/{archive.name}", "The signed appcast points to a different archive URL.")
+    require(archive.is_file() and archive.stat().st_size == update.length, "The staged ZIP does not match the appcast.")
+    run("Appcast signature verification", tools / "sign_update", "--verify", "--account", ACCOUNT, feed)
+    run("ZIP signature verification", tools / "sign_update", "--verify", "--account", ACCOUNT, archive, update.signature)
+
+    already_published = feed.read_bytes() == old_feed.read_bytes()
+    if not already_published:
+        assert_newer(update.version, update.build, read_update(old_feed))
+    with tempfile.TemporaryDirectory(prefix="tipwink-check-") as tmp:
+        downloaded = Path(tmp) / archive.name
+        if not fetch(update.url, downloaded, missing_ok=True):
+            require(not already_published, "The live appcast points to a missing ZIP.")
+            report(f"Uploading {archive.name} to OSS.")
+            put(config, archive, "application/zip", "public,max-age=31536000,immutable", immutable=True)
+            fetch(update.url, downloaded)
+        require(filecmp.cmp(archive, downloaded, shallow=False), "The OSS ZIP differs from the signed local archive.")
+        report("Verified the OSS ZIP against the signed local archive.")
+
+        if not already_published:
+            latest = Path(tmp) / "appcast.xml"
+            fetch(f"{base}/appcast.xml", latest)
+            require(latest.read_bytes() == old_feed.read_bytes(), "The live appcast changed during the release. Recheck before resuming.")
+            report("Publishing the signed appcast.")
+            put(config, feed, "application/xml", "no-cache,max-age=0,must-revalidate")
+            fetch(f"{base}/appcast.xml", latest)
+            require(latest.read_bytes() == feed.read_bytes(), "The live appcast does not match the signed appcast.")
+        report(f"Tipwink {update.version} ({update.build}) is live and verified.")
+
+
+def release(args):
+    config = read_config()
+    tools = Path(config["sparkle_bin"]).expanduser().resolve()
+    public_key = run("Sparkle public key lookup", tools / "generate_keys", "--account", ACCOUNT, "-p", capture=True)
+    require(
+        public_key == config["sparkle_public_key"] and len(base64.b64decode(public_key, validate=True)) == 32,
+        "The Keychain key does not match the existing pilot channel.",
+    )
+    base = f"https://{config['bucket']}.{config['endpoint']}/{config['prefix']}"
+    with tempfile.TemporaryDirectory(prefix="tipwink-current-") as tmp:
+        old_feed = Path(tmp) / "appcast.xml"
+        fetch(f"{base}/appcast.xml", old_feed)
+        current = read_update(old_feed)
+        report(f"Current pilot version is {current.version} ({current.build}).")
+        if args.resume:
+            stage = args.resume.resolve()
+            require(stage.parent == STATE / "releases" and stage.is_dir(), "Choose a staged release from .build/tipwink-pilot/releases.")
+        else:
+            stage = build_release(config, base, public_key, tools, current, args.notes)
+        report(f"Signed files staged in {stage.relative_to(ROOT)}.")
+        publish(config, base, stage, old_feed, tools)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    options = parser.add_mutually_exclusive_group()
+    options.add_argument("--notes", help="Release notes shown in the update dialog.")
+    options.add_argument("--resume", type=Path, metavar="STAGE", help="Retry a release using its existing signed files.")
+    args = parser.parse_args()
+    try:
+        STATE.mkdir(parents=True, exist_ok=True)
+        with (STATE / "release.lock").open("a") as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise ReleaseError("Another Tipwink release is running on this Mac.") from None
+            release(args)
+    except (ReleaseError, OSError, ValueError, KeyError, ET.ParseError) as error:
+        parser.exit(1, f"Release stopped: {error}\n")
+
+
+if __name__ == "__main__":
+    main()
