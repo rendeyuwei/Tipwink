@@ -15,6 +15,8 @@ final class Probe: NSObject, NSApplicationDelegate {
     private var window: NSWindow?
     private var engine: DesktopThemeEngine?
     private var result: [String] = []
+    private var resultURL = output
+    private var measuredBeforeApply = false
     private let cursors: [NSCursor] = [.arrow, .pointingHand, .iBeam]
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -26,6 +28,7 @@ final class Probe: NSObject, NSApplicationDelegate {
         NSApp.activate()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [self] in
             result.append("foreground=\(NSApp.isActive)")
+            result.append("pid=\(ProcessInfo.processInfo.processIdentifier)")
             guard NSApp.isActive else { finish("No active GUI session"); return }
             if mode == "--owner" {
                 owner()
@@ -62,7 +65,16 @@ final class Probe: NSObject, NSApplicationDelegate {
 
     private func witness(index: Int) {
         let roles = CursorRole.allCases
-        guard index < roles.count else { finish(); return }
+        guard index < roles.count else {
+            if mode == "--warm-witness" && !measuredBeforeApply {
+                measuredBeforeApply = true
+                writeResult()
+                waitForFocus(until: Date().addingTimeInterval(30))
+            } else {
+                finish()
+            }
+            return
+        }
         cursors[index].set()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [self] in
             let role = roles[index]
@@ -73,12 +85,28 @@ final class Probe: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func waitForFocus(until deadline: Date) {
+        let signal = arguments[2]
+        if FileManager.default.fileExists(atPath: signal), NSApp.isActive {
+            resultURL = URL(fileURLWithPath: arguments[3])
+            result = ["foreground=true", "pid=\(ProcessInfo.processInfo.processIdentifier)"]
+            witness(index: 0)
+        } else if Date() >= deadline {
+            resultURL = URL(fileURLWithPath: arguments[3])
+            finish("The warm witness did not return to the foreground")
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+                self?.waitForFocus(until: deadline)
+            }
+        }
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         do { try engine?.restore() } catch { print("Restore:", error.localizedDescription) }
     }
 
     private func writeResult() {
-        try? result.joined(separator: "\n").appending("\n").write(to: output, atomically: true, encoding: .utf8)
+        try? result.joined(separator: "\n").appending("\n").write(to: resultURL, atomically: true, encoding: .utf8)
     }
 
     private func finish(_ error: String? = nil) {

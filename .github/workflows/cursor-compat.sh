@@ -22,23 +22,36 @@ xcrun swiftc -swift-version 6 -default-isolation MainActor \
 codesign --sign - --force "$APP"
 if [[ "${1:-}" == "--build-only" ]]; then exit 0; fi
 
+WITNESS="$PROBE_DIR/AlreadyOpen.app"
+ditto "$APP" "$WITNESS"
+plutil -replace CFBundleIdentifier -string studio.papercursor.runner-witness "$WITNESS/Contents/Info.plist"
+codesign --sign - --force "$WITNESS"
+
+wait_for_output() {
+  for attempt in $(seq 1 18); do
+    if [[ -s "$1" ]]; then break; fi
+    sleep 1
+  done
+  cat "$1"
+}
+
 trap 'touch "$PROBE_DIR/stop"' EXIT
-open -W -n "$APP" --args --witness "$PROBE_DIR/before.txt"
-cat "$PROBE_DIR/before.txt"
+open -W -n "$WITNESS" --args --warm-witness "$PROBE_DIR/before.txt" "$PROBE_DIR/recheck" "$PROBE_DIR/applied.txt" &
+WITNESS_OPEN_PID=$!
+wait_for_output "$PROBE_DIR/before.txt"
 grep -q '^foreground=true$' "$PROBE_DIR/before.txt"
 if grep -q 'matches=true$' "$PROBE_DIR/before.txt"; then exit 1; fi
 
 open -W -n "$APP" --args --owner "$PROBE_DIR/owner.txt" "$PROBE_DIR/stop" &
 OWNER_OPEN_PID=$!
-for attempt in $(seq 1 18); do
-  if [[ -s "$PROBE_DIR/owner.txt" ]]; then break; fi
-  sleep 1
-done
-cat "$PROBE_DIR/owner.txt"
+wait_for_output "$PROBE_DIR/owner.txt"
 grep -q '^applied=true$' "$PROBE_DIR/owner.txt"
-open -W -n "$APP" --args --witness "$PROBE_DIR/applied.txt"
-cat "$PROBE_DIR/applied.txt"
+open "$WITNESS"
+touch "$PROBE_DIR/recheck"
+wait_for_output "$PROBE_DIR/applied.txt"
+wait "$WITNESS_OPEN_PID"
 touch "$PROBE_DIR/stop"
 wait "$OWNER_OPEN_PID"
 grep -q '^foreground=true$' "$PROBE_DIR/applied.txt"
+grep -q -F -x "$(grep '^pid=' "$PROBE_DIR/before.txt")" "$PROBE_DIR/applied.txt"
 [[ "$(grep -c 'matches=true$' "$PROBE_DIR/applied.txt")" == 3 ]]
