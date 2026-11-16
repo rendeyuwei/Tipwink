@@ -207,7 +207,7 @@ struct LibraryView: View {
     private var actions: some View {
         VStack(alignment: .leading, spacing: 9) {
             if library.hasPointerColorConflict {
-                Text("macOS 自定义指针颜色会覆盖桌面主题。请在「指针」中点「重设颜色」。指针大小可以保留。")
+                Text("系统自定义指针颜色会覆盖桌面主题。用下方按钮打开设置，点「重设颜色」，回到纸尖时会自动应用。指针大小可以保留。")
                     .font(.system(size: 12))
                     .foregroundStyle(inkAccent)
                     .fixedSize(horizontal: false, vertical: true)
@@ -224,7 +224,7 @@ struct LibraryView: View {
                     .disabled(library.applied == nil && !library.needsRecovery)
                     .accessibilityIdentifier("restore-cursor")
                 if library.hasPointerColorConflict {
-                    Button("打开指针设置") { SystemPointerColors.openSettings() }
+                    Button("重设后应用…") { library.applyAfterColorReset() }
                         .buttonStyle(.borderedProminent)
                         .accessibilityIdentifier("open-pointer-settings")
                 } else {

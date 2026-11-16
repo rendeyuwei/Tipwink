@@ -10,6 +10,7 @@ final class ThemeLibrary {
     private let desktop = DesktopThemeEngine()
     private let preferencesKey = "theme-settings"
     @ObservationIgnored private var settingsTimer: Timer?
+    @ObservationIgnored private var applyAfterReturningFromSettings = false
 
     var settings: ThemeSettings {
         didSet {
@@ -79,8 +80,30 @@ final class ThemeLibrary {
     func apply() {
         refreshPointerColorConflict()
         guard !hasPointerColorConflict else { return }
+        applyAfterReturningFromSettings = false
         cancelPendingUpdate()
         if !selectionIsApplied || needsRecovery { applyToDesktop() }
+    }
+
+    func applyAfterColorReset() {
+        refreshPointerColorConflict()
+        guard hasPointerColorConflict else {
+            apply()
+            return
+        }
+        applyAfterReturningFromSettings = SystemPointerColors.openSettings()
+        if !applyAfterReturningFromSettings {
+            message = "请手动打开「系统设置 → 辅助功能 → 显示」，在「指针」中点「重设颜色」。"
+        }
+    }
+
+    func resumeAfterPointerSettings() {
+        if applyAfterReturningFromSettings {
+            applyAfterReturningFromSettings = false
+            apply()
+        } else {
+            refreshPointerColorConflict()
+        }
     }
 
     func refreshPointerColorConflict() {
@@ -109,6 +132,7 @@ final class ThemeLibrary {
     }
 
     func restore() {
+        applyAfterReturningFromSettings = false
         cancelPendingUpdate()
         do {
             try desktop.restore()
@@ -137,7 +161,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ notification: Notification) {
-        ThemeLibrary.shared.refreshPointerColorConflict()
+        ThemeLibrary.shared.resumeAfterPointerSettings()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -162,7 +186,7 @@ struct TipwinkApp: App {
             }
             CommandMenu("光标") {
                 if library.hasPointerColorConflict {
-                    Button("打开指针设置") { SystemPointerColors.openSettings() }
+                    Button("重设后应用…") { library.applyAfterColorReset() }
                 } else {
                     Button("应用主题") { library.apply() }
                         .keyboardShortcut(.return, modifiers: .command)
@@ -193,8 +217,8 @@ private struct LibraryMenu: View {
         }
         Divider()
         if library.hasPointerColorConflict {
-            Text("请先重设 macOS 指针颜色")
-            Button("打开指针设置") { SystemPointerColors.openSettings() }
+            Text("重设系统指针颜色后即可应用")
+            Button("重设后应用…") { library.applyAfterColorReset() }
         } else {
             ForEach(CursorTheme.allCases) { theme in
                 Button {

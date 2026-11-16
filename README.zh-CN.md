@@ -27,11 +27,11 @@ Apple 芯片 Mac · 最低安装版本 macOS 26
 2. 选一套主题，预览指向、链接和文字三种光标。试用区可以点击按钮和链接、选字和拖动，大小可调到 75% 至 150%。
 3. 点击「应用到桌面」。主题、样式、大小和配色会即时生效。要切回去，在窗口或菜单栏点「恢复原光标」。
 
-已经安装内测版？在应用菜单或菜单栏选择「检查更新…」。
+点击菜单栏的光标图标，可以重新打开主题库、切换主题、检查更新或退出纸尖。
 
 桌面换肤已在 macOS 26.6.2 实测。指向、链接和文字三种光标也通过了 macOS 26.7.2、27.0.1 和 27.2 的原生应用测试。自行绘制指针的应用和部分系统界面可能显示不同的光标。[26.7.2 和 27.0.1 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) · [27.2 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43893555334/job/133390880912)
 
-macOS 自定义指针颜色会覆盖桌面主题。如果纸尖显示「打开指针设置」，或鼠标移到 Finder 时恢复了系统光标，请到「系统设置 → 辅助功能 → 显示 → 指针」点「重设颜色」，再回纸尖应用主题。指针大小可以保留。[Apple 指针设置说明](https://support.apple.com/zh-cn/guide/mac-help/make-the-pointer-easier-to-see-mchlp2920/mac)
+macOS 自定义指针颜色会覆盖桌面主题。在纸尖点「重设后应用…」会打开「系统设置 → 辅助功能 → 显示」。在「指针」中点「重设颜色」，回到纸尖时就会应用选中的主题。指针大小可以保留。[Apple 指针设置说明](https://support.apple.com/zh-cn/guide/mac-help/make-the-pointer-easier-to-see-mchlp2920/mac)
 
 内测安装包使用 Apple Development 签名。公开分发前需要 Developer ID 签名和 Apple 公证。
 

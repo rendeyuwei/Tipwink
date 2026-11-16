@@ -27,11 +27,11 @@ Apple Silicon · macOS 26 minimum · Pilot build
 2. Choose a theme and preview its pointer, link, and text cursors. You can test clicks, links, text selection, and dragging, and set the size from 75% to 150%.
 3. Choose **Apply to Desktop** (应用到桌面). Theme, style, size, and color changes apply as you make them. Use **Restore Original Cursor** (恢复原光标) in the window or menu bar to switch back.
 
-Already running the pilot? Choose **Check for Updates…** (检查更新…) from the app menu or menu bar.
+Use the cursor icon in the menu bar to reopen the theme library, switch themes, check for updates, or quit Tipwink.
 
 Desktop theming was tested on macOS 26.6.2. Native app checks also passed on macOS 26.7.2, 27.0.1, and 27.2. Apps that draw their own cursors and some system screens may show a different pointer. [Test results for 26.7.2 and 27.0.1](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) · [Test results for 27.2](https://github.com/rendeyuwei/Tipwink/actions/runs/43893555334/job/133390880912)
 
-Custom macOS pointer colors can override desktop themes. If Tipwink shows **Open Pointer Settings** (打开指针设置), or Finder returns to the system pointer, go to **System Settings → Accessibility → Display → Pointer**. Choose **Reset Colors**, then return to Tipwink and apply the theme. You can keep your pointer size. [Apple's pointer settings guide](https://support.apple.com/guide/mac-help/make-the-pointer-easier-to-see-mchlp2920/mac)
+Custom macOS pointer colors can override desktop themes. Choose **Apply After Reset…** (重设后应用…) to open **System Settings → Accessibility → Display**. In the **Pointer** section, choose **Reset Colors**. Tipwink applies the selected theme when you return. You can keep your pointer size. [Apple's pointer settings guide](https://support.apple.com/guide/mac-help/make-the-pointer-easier-to-see-mchlp2920/mac)
 
 The pilot ZIP uses Apple Development signing. Public distribution requires a Developer ID signed and notarized build.
 
