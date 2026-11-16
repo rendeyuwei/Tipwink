@@ -29,7 +29,7 @@ Apple 芯片 Mac · 最低安装版本 macOS 26
 
 已经安装内测版？在应用菜单或菜单栏选择「检查更新…」。
 
-桌面换肤已在 macOS 26.6.2 实测，指向、链接和文字三种光标也通过了 macOS 26.7.2 和 27.0.1 的[跨应用测试](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673)。macOS 27 上有 Finder 恢复系统光标的反馈，目前仍在排查。自行绘制指针的应用和部分系统界面可能显示不同的光标。
+桌面换肤已在 macOS 26.6.2 实测。指向、链接和文字三种光标也通过了 macOS 26.7.2、27.0.1 和 27.2 的原生应用测试。macOS 27 上有 Finder 恢复系统光标的反馈，目前仍在排查。自行绘制指针的应用和部分系统界面可能显示不同的光标。[26.7.2 和 27.0.1 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) · [27.2 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43893555334/job/133390880912)
 
 内测安装包使用 Apple Development 签名。公开分发前需要 Developer ID 签名和 Apple 公证。
 

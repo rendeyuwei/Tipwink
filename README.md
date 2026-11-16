@@ -29,7 +29,7 @@ Apple Silicon · macOS 26 minimum · Pilot build
 
 Already running the pilot? Choose **Check for Updates…** (检查更新…) from the app menu or menu bar.
 
-Desktop theming was tested on macOS 26.6.2. A [native-app check](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) also passed on macOS 26.7.2 and 27.0.1. A Finder compatibility issue reported on macOS 27 is still under investigation. Apps that draw their own cursors and some system screens may show a different pointer.
+Desktop theming was tested on macOS 26.6.2. Native app checks also passed on macOS 26.7.2, 27.0.1, and 27.2. A Finder compatibility issue reported on macOS 27 is still under investigation. Apps that draw their own cursors and some system screens may show a different pointer. [Test results for 26.7.2 and 27.0.1](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) · [Test results for 27.2](https://github.com/rendeyuwei/Tipwink/actions/runs/43893555334/job/133390880912)
 
 The pilot ZIP uses Apple Development signing. Public distribution requires a Developer ID signed and notarized build.
 
