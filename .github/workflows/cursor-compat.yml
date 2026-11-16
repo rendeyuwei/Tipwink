@@ -1,0 +1,21 @@
+name: Cross-app cursor compatibility
+on:
+  push:
+    branches: [codex/diagnose-macos27-cursors]
+permissions:
+  contents: read
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-26, xcode-27]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Probe the active native cursor
+        run: bash .github/workflows/cursor-compat.sh
