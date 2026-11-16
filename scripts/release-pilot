@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and publish a signed Tipwink update from the release Mac."""
+"""Build a signed Tipwink update and publish it to GitHub and OSS."""
 
 import argparse
 import base64
@@ -11,6 +11,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / ".build" / "tipwink-pilot"
 ACCOUNT = "tipwink"
+GITHUB_REPO = "rendeyuwei/Tipwink"
 SPARKLE = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
 
 
@@ -31,16 +33,21 @@ def require(condition, message):
         raise ReleaseError(message)
 
 
-def run(label, *command, capture=False):
-    result = subprocess.run(
-        [str(arg) for arg in command],
-        cwd=ROOT,
-        stdout=subprocess.PIPE if capture else None,
-        text=True,
-        check=False,
-    )
-    require(result.returncode == 0, f"{label} failed (exit {result.returncode}).")
-    return result.stdout.strip() if capture else None
+def run(label, *command, capture=False, attempts=1):
+    for attempt in range(attempts):
+        result = subprocess.run(
+            [str(arg) for arg in command],
+            cwd=ROOT,
+            stdout=subprocess.PIPE if capture else None,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip() if capture else None
+        if attempt + 1 < attempts:
+            report(f"{label} failed. Retrying.")
+            time.sleep(1)
+    raise ReleaseError(f"{label} failed (exit {result.returncode}).")
 
 
 def report(message):
@@ -130,7 +137,17 @@ def assert_newer(version, build, current):
     )
 
 
+def source_commit():
+    status = run("Git status", "git", "status", "--porcelain", "--untracked-files=normal", capture=True)
+    require(not status, "Commit your source changes before building an update.")
+    return run("Git commit lookup", "git", "rev-parse", "HEAD", capture=True)
+
+
 def build_release(config, base, public_key, tools, current, notes):
+    commit = source_commit()
+    pushed = run("GitHub source lookup (push your source commit first)", "gh", "api", "--hostname", "github.com",
+                 f"repos/{GITHUB_REPO}/commits/{commit}", "--jq", ".sha", capture=True, attempts=2)
+    require(pushed == commit, "Push the source commit to GitHub before releasing.")
     report("Building the Apple Development signed Release configuration.")
     products = STATE / "products"
     run(
@@ -142,6 +159,7 @@ def build_release(config, base, public_key, tools, current, notes):
         f"DEVELOPMENT_TEAM={config['development_team']}", f"TIPWINK_APPCAST_URL={base}/appcast.xml",
         f"TIPWINK_UPDATE_PUBLIC_KEY={public_key}", "build",
     )
+    require(source_commit() == commit, "The source commit changed during the build.")
     with tempfile.TemporaryDirectory(prefix="tipwink-sign-") as tmp:
         app = Path(tmp) / "Tipwink.app"
         run("Copy for packaging", "ditto", "--norsrc", "--noextattr", "--noqtn", products / app.name, app)
@@ -173,8 +191,109 @@ def build_release(config, base, public_key, tools, current, notes):
             )
             update = read_update(draft / "appcast.xml")
             require((update.version, update.build) == (version, build), "The appcast version does not match the build.")
+            (draft / "source-commit.txt").write_text(commit + "\n", encoding="utf-8")
             draft.rename(stage)
         return stage
+
+
+def github_release(tag):
+    raw = run("GitHub release lookup", "gh", "api", "--hostname", "github.com",
+              f"repos/{GITHUB_REPO}/releases", "--paginate", "--slurp", capture=True, attempts=2)
+    matches = [release for page in json.loads(raw) for release in page if release["tag_name"] == tag]
+    require(len(matches) <= 1, f"Multiple GitHub releases use {tag}.")
+    return matches[0] if matches else None
+
+
+def github_tag_commit(tag):
+    raw = run("GitHub tag lookup", "gh", "api", "--hostname", "github.com",
+              f"repos/{GITHUB_REPO}/git/matching-refs/tags/{tag}",
+              "--jq", f'.[] | select(.ref == "refs/tags/{tag}") | .object', capture=True, attempts=2)
+    if not raw:
+        return None
+    tag_object = json.loads(raw)
+    if tag_object["type"] == "commit":
+        return tag_object["sha"]
+    return run("GitHub tag commit lookup", "gh", "api", "--hostname", "github.com",
+               f"repos/{GITHUB_REPO}/commits/tags%2F{tag}", "--jq", ".sha", capture=True, attempts=2)
+
+
+def publish_github(update, archive, workdir):
+    tag = f"v{update.version}"
+    repository = f"github.com/{GITHUB_REPO}"
+    link = f"https://{repository}/releases/download/{tag}/{archive.name}"
+    release = github_release(tag)
+    tagged_commit = github_tag_commit(tag)
+    source = archive.parent / "source-commit.txt"
+    if source.is_file():
+        commit = source.read_text(encoding="utf-8").strip()
+        require(re.fullmatch(r"[0-9a-f]{40}", commit), "The staged source commit is invalid.")
+    else:
+        # An older stage needs an existing release to identify its source commit.
+        require(release and not release["draft"] and tagged_commit,
+                "This older stage has no recorded source commit or published GitHub release.")
+        commit = tagged_commit
+    require(tagged_commit in (None, commit), f"GitHub tag {tag} points to a different commit.")
+
+    notes_file = workdir / "github-notes.md"
+    header = f"**[Download for Mac · 下载 Mac 版]({link})**\n\n"
+    link_target = f"]({link})"
+    if release is None:
+        notes = archive.with_suffix(".md")
+        body = "Apple Silicon · Minimum macOS 26 · Pilot build / 内测版\n\n"
+        if notes.is_file():
+            body += notes.read_text(encoding="utf-8").strip() + "\n\n"
+        body += "This pilot build uses Apple Development signing.\n"
+        notes_file.write_text(header + body, encoding="utf-8")
+        report(f"Creating GitHub prerelease draft {tag}.")
+        run("GitHub draft creation", "gh", "release", "create", tag, "--repo", repository,
+            "--draft", "--prerelease", "--target", commit, "--title", f"Tipwink {update.version}",
+            "--notes-file", notes_file, capture=True)
+        release = github_release(tag)
+    require(release and release["prerelease"], f"GitHub {tag} must be a prerelease for the pilot.")
+    require(tagged_commit or (release["draft"] and release["target_commitish"] == commit),
+            f"GitHub release {tag} points to a different commit.")
+
+    asset = next((item for item in release["assets"] if item["name"] == archive.name), None)
+    if asset and release["draft"] and asset["state"] == "starter" and asset["size"] == 0:
+        run("Remove incomplete GitHub upload", "gh", "api", "--hostname", "github.com", "--method", "DELETE",
+            f"repos/{GITHUB_REPO}/releases/assets/{asset['id']}", capture=True)
+        asset = None
+    if asset is None:
+        require(source.is_file(), "The older stage has no existing GitHub asset to verify.")
+        report(f"Uploading {archive.name} to GitHub.")
+        run("GitHub ZIP upload", "gh", "release", "upload", tag, archive, "--repo", repository, capture=True)
+    else:
+        require(asset["state"] == "uploaded" and asset["size"] == update.length,
+                f"GitHub already has an unexpected asset named {archive.name}.")
+
+    download_dir = workdir / "github"
+    download_dir.mkdir()
+    run("GitHub ZIP download", "gh", "release", "download", tag, "--repo", repository,
+        "--pattern", archive.name, "--dir", download_dir)
+    require(filecmp.cmp(archive, download_dir / archive.name, shallow=False),
+            "The GitHub ZIP differs from the signed local archive.")
+    report("Verified the GitHub ZIP against the signed local archive.")
+
+    body = release["body"] or ""
+    edits = []
+    if link_target not in body:
+        notes_file.write_text(header + body, encoding="utf-8")
+        edits.extend(("--notes-file", notes_file))
+    if release["draft"]:
+        edits.append("--draft=false")
+    if edits:
+        run("GitHub release publication", "gh", "release", "edit", tag, "--repo", repository, *edits, capture=True)
+
+    published = github_release(tag) if edits or asset is None else release
+    require(published and not published["draft"] and published["prerelease"]
+            and link_target in (published["body"] or ""),
+            f"GitHub {tag} is not published with its download link.")
+    require(any(item["browser_download_url"] == link and item["state"] == "uploaded"
+                and item["size"] == update.length for item in published["assets"]),
+            f"GitHub {tag} does not expose the verified ZIP.")
+    published_commit = github_tag_commit(tag) if release["draft"] else tagged_commit
+    require(published_commit == commit, f"Published GitHub tag {tag} points to a different commit.")
+    report(f"GitHub release: {published['html_url']}")
 
 
 def publish(config, base, stage, old_feed, tools):
@@ -198,6 +317,8 @@ def publish(config, base, stage, old_feed, tools):
             fetch(update.url, downloaded)
         require(filecmp.cmp(archive, downloaded, shallow=False), "The OSS ZIP differs from the signed local archive.")
         report("Verified the OSS ZIP against the signed local archive.")
+
+        publish_github(update, archive, Path(tmp))
 
         if not already_published:
             latest = Path(tmp) / "appcast.xml"
@@ -236,8 +357,8 @@ def release(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     options = parser.add_mutually_exclusive_group()
-    options.add_argument("--notes", help="Release notes shown in the update dialog.")
-    options.add_argument("--resume", type=Path, metavar="STAGE", help="Retry a release using its existing signed files.")
+    options.add_argument("--notes", help="Release notes shown on GitHub and in the update dialog.")
+    options.add_argument("--resume", type=Path, metavar="STAGE", help="Resume publication using its existing signed files.")
     args = parser.parse_args()
     try:
         STATE.mkdir(parents=True, exist_ok=True)

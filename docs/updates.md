@@ -6,29 +6,17 @@ Tipwink uses [Sparkle](https://sparkle-project.org/documentation/) to read an HT
 
 The pilot uses a dedicated Alibaba Cloud OSS bucket in Hong Kong and its built-in HTTPS endpoint. The bucket is private. Its policy allows HTTPS reads for the appcast and versioned ZIP files at the pilot path. Anyone with one of those links can read that file. Listing and writing still require authorization.
 
-On the release Mac, increase `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project. From the checkout root, run one command. The notes are optional and appear in the update dialog.
+On the release Mac, increase `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project, commit the changes, and push the commit to GitHub. From the checkout root, run one command. The optional notes appear in the GitHub release and the update dialog.
 
 ```sh
 ./scripts/release-pilot --notes "Added three cursor themes."
 ```
 
-The command builds and code signs the app, signs and verifies the ZIP and appcast with Sparkle, and compares the ZIP downloaded from OSS to the local file. It uploads the appcast last and verifies the bytes served over HTTPS. Versioned ZIPs use overwrite protection. Git pushes update the source repository.
+The command builds and code signs the app, then signs and verifies the ZIP and appcast with Sparkle. It uploads and verifies the versioned ZIP on OSS. It attaches the same ZIP to a GitHub prerelease for the source commit, verifies the download, and publishes the release with a direct link. After that, it uploads the signed `appcast.xml` and verifies the bytes served over HTTPS.
 
-The ignored `.tipwink-pilot.json` records `bucket`, `endpoint`, `prefix`, `region`, and `profile` for the existing OSS channel. It also contains `development_team` for Apple Development signing, `sparkle_bin` for the Sparkle tool directory, and `sparkle_public_key` for the public key already embedded in the pilot app. The private key stays in the login Keychain under account `tipwink`. macOS may ask for Keychain access during signing or verification. The release Mac needs Xcode, Python 3, the Sparkle tools, and an active Alibaba Cloud CLI login for the configured profile.
+The ignored `.tipwink-pilot.json` records `bucket`, `endpoint`, `prefix`, `region`, and `profile` for the existing OSS channel. It also contains `development_team` for Apple Development signing, `sparkle_bin` for the Sparkle tool directory, and `sparkle_public_key` for the public key already embedded in the pilot app. The private key stays in the login Keychain under account `tipwink`. macOS may ask for Keychain access during signing or verification. The release Mac needs Xcode, Python 3, the Sparkle tools, an active Alibaba Cloud CLI login for the configured profile, and a GitHub CLI login with write access to `rendeyuwei/Tipwink`.
 
-The script prints the path to the signed files under `.build/tipwink-pilot/releases`. If the network fails after staging, retry those same files with `./scripts/release-pilot --resume <staged-directory>`. To change the contents of a staged release, increment the version and build number.
-
-### Add the GitHub download
-
-After the script verifies the OSS update, attach its staged ZIP to a GitHub prerelease so people with repository access can download it from [Releases](https://github.com/rendeyuwei/Tipwink/releases). Use the same signed file for both downloads. Set `VERSION` to the release version, `ZIP_PATH` to the staged ZIP, `SOURCE_COMMIT` to the pushed commit that was built, and `NOTES_PATH` to your release notes file.
-
-```sh
-gh release create "v$VERSION" "$ZIP_PATH" --repo rendeyuwei/Tipwink \
-  --target "$SOURCE_COMMIT" --prerelease --title "Tipwink $VERSION" \
-  --notes-file "$NOTES_PATH"
-```
-
-Put a direct download link in the release notes with the path `/releases/download/v<VERSION>/Tipwink-<VERSION>-macOS-arm64.zip` on the repository URL. Label the package as a pilot.
+The script prints the path to the signed files under `.build/tipwink-pilot/releases`. If a remote step fails after staging, retry those same files with `./scripts/release-pilot --resume <staged-directory>`. The script reuses a matching draft, ZIP, or release. If an uploaded ZIP differs, it stops and leaves the update feed alone. To change the contents of a staged release, increment the version and build number.
 
 For distribution to other Mac users, build a Developer ID signed and notarized version and use a separate release feed.
 
