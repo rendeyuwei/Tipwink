@@ -20,13 +20,14 @@ final class ThemeLibrary {
     private(set) var applied: ThemeSettings?
     private(set) var needsRecovery = false
     private(set) var message: String?
+    private(set) var hasPointerColorConflict = SystemPointerColors.isCustomized()
 
     private var selectionIsApplied: Bool {
         applied?.hasSameAppearance(as: settings) == true
     }
 
     var canApplyManually: Bool {
-        applied == nil || (message != nil && !selectionIsApplied)
+        !hasPointerColorConflict && (applied == nil || (message != nil && !selectionIsApplied))
     }
 
     private init() {
@@ -76,8 +77,20 @@ final class ThemeLibrary {
     }
 
     func apply() {
+        refreshPointerColorConflict()
+        guard !hasPointerColorConflict else { return }
         cancelPendingUpdate()
         if !selectionIsApplied || needsRecovery { applyToDesktop() }
+    }
+
+    func refreshPointerColorConflict() {
+        let hasConflict = SystemPointerColors.isCustomized()
+        guard hasConflict != hasPointerColorConflict else { return }
+        hasPointerColorConflict = hasConflict
+        if hasConflict, applied != nil {
+            applied = nil
+            restore()
+        }
     }
 
     private func applyToDesktop() {
@@ -110,6 +123,23 @@ final class ThemeLibrary {
 }
 
 final class ApplicationDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(displayOptionsDidChange),
+            name: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
+            object: nil
+        )
+    }
+
+    @objc nonisolated private func displayOptionsDidChange(_ notification: Notification) {
+        Task { @MainActor in ThemeLibrary.shared.refreshPointerColorConflict() }
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        ThemeLibrary.shared.refreshPointerColorConflict()
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         ThemeLibrary.shared.restore()
     }
@@ -131,9 +161,13 @@ struct TipwinkApp: App {
                 UpdateMenuItems(updates: updates)
             }
             CommandMenu("光标") {
-                Button("应用主题") { library.apply() }
-                    .keyboardShortcut(.return, modifiers: .command)
-                    .disabled(!library.canApplyManually)
+                if library.hasPointerColorConflict {
+                    Button("打开指针设置") { SystemPointerColors.openSettings() }
+                } else {
+                    Button("应用主题") { library.apply() }
+                        .keyboardShortcut(.return, modifiers: .command)
+                        .disabled(!library.canApplyManually)
+                }
                 Button("恢复原光标") { library.restore() }
                     .keyboardShortcut("0", modifiers: [.command, .option])
                     .disabled(library.applied == nil && !library.needsRecovery)
@@ -158,15 +192,20 @@ private struct LibraryMenu: View {
             NSApp.activate()
         }
         Divider()
-        ForEach(CursorTheme.allCases) { theme in
-            Button {
-                library.select(theme)
-                library.apply()
-            } label: {
-                if library.applied?.theme == theme {
-                    Label(theme.name, systemImage: "checkmark")
-                } else {
-                    Text(theme.name)
+        if library.hasPointerColorConflict {
+            Text("请先重设 macOS 指针颜色")
+            Button("打开指针设置") { SystemPointerColors.openSettings() }
+        } else {
+            ForEach(CursorTheme.allCases) { theme in
+                Button {
+                    library.select(theme)
+                    library.apply()
+                } label: {
+                    if library.applied?.theme == theme {
+                        Label(theme.name, systemImage: "checkmark")
+                    } else {
+                        Text(theme.name)
+                    }
                 }
             }
         }
