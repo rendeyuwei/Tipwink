@@ -29,7 +29,9 @@ Apple 芯片 Mac · 最低安装版本 macOS 26
 
 已经安装内测版？在应用菜单或菜单栏选择「检查更新…」。
 
-桌面换肤已在 macOS 26.6.2 实测。指向、链接和文字三种光标也通过了 macOS 26.7.2、27.0.1 和 27.2 的原生应用测试。macOS 27 上有 Finder 恢复系统光标的反馈，目前仍在排查。自行绘制指针的应用和部分系统界面可能显示不同的光标。[26.7.2 和 27.0.1 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) · [27.2 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43893555334/job/133390880912)
+桌面换肤已在 macOS 26.6.2 实测。指向、链接和文字三种光标也通过了 macOS 26.7.2、27.0.1 和 27.2 的原生应用测试。自行绘制指针的应用和部分系统界面可能显示不同的光标。[26.7.2 和 27.0.1 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) · [27.2 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43893555334/job/133390880912)
+
+如果应用主题后移到 Finder 会恢复系统光标，请打开「系统设置 → 辅助功能 → 显示 → 指针」。如果改过指针颜色，试着点「重设颜色」，再回纸尖重新应用主题。排查颜色冲突时可以保留原来的指针大小。[Apple 指针设置说明](https://support.apple.com/zh-cn/guide/mac-help/make-the-pointer-easier-to-see-mchlp2920/mac)
 
 内测安装包使用 Apple Development 签名。公开分发前需要 Developer ID 签名和 Apple 公证。
 
