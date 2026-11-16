@@ -6,7 +6,7 @@ Give your pointer a paper cat, a folded plane, or a look of your own. Try it on 
 
 **[Download for Mac](https://github.com/rendeyuwei/Tipwink/releases)** · [简体中文](README.zh-CN.md)
 
-Apple Silicon · macOS 26 or later · Pilot build
+Apple Silicon · macOS 26 minimum · Pilot build
 
 ![Paper Plane, Gummy Ghost, and Night Crosshair on light and dark backgrounds](docs/images/cursor-preview.png)
 
@@ -29,18 +29,20 @@ Apple Silicon · macOS 26 or later · Pilot build
 
 Already running the pilot? Choose **Check for Updates…** (检查更新…) from the app menu or menu bar.
 
-The pilot ZIP uses Apple Development signing. Public distribution requires a Developer ID signed and notarized build. Apps that draw their own cursors and some system screens may show a different pointer.
+Desktop theming was tested on macOS 26.6.2. A [native-app check](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) also passed on macOS 26.7.2 and 27.0.1. A Finder compatibility issue reported on macOS 27 is still under investigation. Apps that draw their own cursors and some system screens may show a different pointer.
+
+The pilot ZIP uses Apple Development signing. Public distribution requires a Developer ID signed and notarized build.
 
 ## Build and publish
 
 Open [Tipwink.xcodeproj](Tipwink.xcodeproj) in Xcode 26 or later and run the **Tipwink** scheme.
 
-On the configured release Mac, increment the version and build number, then run this from the checkout root:
+On the configured release Mac, increment the version and build number, commit and push the changes, then run the release script from the checkout root.
 
 ```sh
 ./scripts/release-pilot
 ```
 
-The script builds, signs, and verifies the OSS pilot update. The same signed ZIP can also be attached to a GitHub release. [Release guide](docs/updates.md)
+The script builds and signs one ZIP, publishes it to GitHub Releases with a download link, and verifies that OSS serves the same file. It updates the in-app feed after both downloads pass verification. [Release guide](docs/updates.md)
 
 Tipwink's cursor artwork is drawn in the project. Its theme library and interactive preview took inspiration from [MaCursor](https://writronic.com/macursor/) and [CursorMagic](https://pocketgiant.co/software/cursormagic/).

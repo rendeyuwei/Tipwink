@@ -6,7 +6,7 @@
 
 **[下载 Mac 内测版](https://github.com/rendeyuwei/Tipwink/releases)** · [English](README.md)
 
-适用于 Apple 芯片 Mac · macOS 26 或更新版本
+Apple 芯片 Mac · 最低安装版本 macOS 26
 
 ![纸飞机、软糖幽灵和夜光准星的浅色与深色预览](docs/images/cursor-preview.png)
 
@@ -29,18 +29,20 @@
 
 已经安装内测版？在应用菜单或菜单栏选择「检查更新…」。
 
-内测安装包使用 Apple Development 签名。公开分发前需要 Developer ID 签名和 Apple 公证。自行绘制指针的应用和部分系统界面可能显示不同的光标。
+桌面换肤已在 macOS 26.6.2 实测，指向、链接和文字三种光标也通过了 macOS 26.7.2 和 27.0.1 的[跨应用测试](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673)。macOS 27 上有 Finder 恢复系统光标的反馈，目前仍在排查。自行绘制指针的应用和部分系统界面可能显示不同的光标。
+
+内测安装包使用 Apple Development 签名。公开分发前需要 Developer ID 签名和 Apple 公证。
 
 ## 构建与发版
 
 用 Xcode 26 或更新版本打开 [Tipwink.xcodeproj](Tipwink.xcodeproj)，运行 **Tipwink** scheme。
 
-在已配置的发版 Mac 上递增版本号和构建号，然后从仓库根目录运行：
+在已配置的发版 Mac 上递增版本号和构建号，提交并推送后，从仓库根目录运行发版脚本。
 
 ```sh
 ./scripts/release-pilot
 ```
 
-脚本会构建、签名并验证 OSS 内测更新。同一份签名 ZIP 也可以作为 GitHub Release 的下载附件。[发布指南](docs/updates.md)
+脚本会构建并签名同一份 ZIP，把它传到 OSS 和 GitHub Release，并在 Release 里放好下载链接。两边的下载验证通过后，才会更新 App 里的版本清单。[发布指南](docs/updates.md)
 
 所有光标图形均在本工程内绘制。主题库和试用区参考了 [MaCursor](https://writronic.com/macursor/) 和 [CursorMagic](https://pocketgiant.co/software/cursormagic/)。
