@@ -10,6 +10,8 @@
 
 ![纸片猫、像素果冻、双色箭头和铅笔的浅色与深色预览](docs/images/cursor-preview.png)
 
+[在浏览器里试用四套光标](https://rendeyuwei.github.io/Tipwink/zh-cn/#preview)
+
 ## 开始使用
 
 1. 下载并解压 `Tipwink-macOS-arm64.zip`，将 `Tipwink.app` 移到「应用程序」，然后打开。
