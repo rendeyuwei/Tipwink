@@ -93,7 +93,7 @@ final class ThemeLibrary {
         }
         applyAfterReturningFromSettings = SystemPointerColors.openSettings()
         if !applyAfterReturningFromSettings {
-            message = "请手动打开「系统设置 → 辅助功能 → 显示」，在「指针」中点「重设颜色」。"
+            message = String(localized: "Go to System Settings → Accessibility → Display. Under Pointer, click Reset Colors.")
         }
     }
 
@@ -175,7 +175,7 @@ struct TipwinkApp: App {
     @StateObject private var updates = SoftwareUpdates()
 
     var body: some Scene {
-        Window("纸尖", id: "library") {
+        Window("Tipwink", id: "library") {
             LibraryView(library: library)
         }
         .defaultSize(width: 884, height: 600)
@@ -184,21 +184,21 @@ struct TipwinkApp: App {
             CommandGroup(after: .appInfo) {
                 UpdateMenuItems(updates: updates)
             }
-            CommandMenu("光标") {
+            CommandMenu("Cursor") {
                 if library.hasPointerColorConflict {
-                    Button("重设后应用…") { library.applyAfterColorReset() }
+                    Button("Apply After Reset…") { library.applyAfterColorReset() }
                 } else {
-                    Button("应用主题") { library.apply() }
+                    Button("Apply Theme") { library.apply() }
                         .keyboardShortcut(.return, modifiers: .command)
                         .disabled(!library.canApplyManually)
                 }
-                Button("恢复原光标") { library.restore() }
+                Button("Restore Original Cursor") { library.restore() }
                     .keyboardShortcut("0", modifiers: [.command, .option])
                     .disabled(library.applied == nil && !library.needsRecovery)
             }
         }
 
-        MenuBarExtra("纸尖", systemImage: "cursorarrow.rays") {
+        MenuBarExtra("Tipwink", systemImage: "cursorarrow.rays") {
             LibraryMenu(library: library, updates: updates)
         }
         .menuBarExtraStyle(.menu)
@@ -211,14 +211,14 @@ private struct LibraryMenu: View {
     let updates: SoftwareUpdates
 
     var body: some View {
-        Button("打开主题库") {
+        Button("Open Theme Library") {
             openWindow(id: "library")
             NSApp.activate()
         }
         Divider()
         if library.hasPointerColorConflict {
-            Text("重设系统指针颜色后即可应用")
-            Button("重设后应用…") { library.applyAfterColorReset() }
+            Text("Reset system pointer colors to apply a theme")
+            Button("Apply After Reset…") { library.applyAfterColorReset() }
         } else {
             ForEach(CursorTheme.allCases) { theme in
                 Button {
@@ -237,10 +237,10 @@ private struct LibraryMenu: View {
             Text(message)
         }
         Divider()
-        Button("恢复原光标") { library.restore() }
+        Button("Restore Original Cursor") { library.restore() }
             .disabled(library.applied == nil && !library.needsRecovery)
         Divider()
         UpdateMenuItems(updates: updates)
-        Button("退出纸尖") { NSApp.terminate(nil) }
+        Button("Quit Tipwink") { NSApp.terminate(nil) }
     }
 }

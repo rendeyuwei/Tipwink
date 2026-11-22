@@ -8,9 +8,9 @@
             isa = PBXProject;
             attributes = { LastSwiftUpdateCheck = 2720; LastUpgradeCheck = 2720; };
             buildConfigurationList = D61200000000000000000010;
-            developmentRegion = "zh-Hans";
+            developmentRegion = en;
             hasScannedForEncodings = 0;
-            knownRegions = ("zh-Hans", Base);
+            knownRegions = (en, "zh-Hans", Base);
             mainGroup = D61200000000000000000002;
             packageReferences = (D61200000000000000000016);
             preferredProjectObjectVersion = 77;
@@ -31,7 +31,7 @@
         };
         D61200000000000000000004 = {
             isa = PBXGroup;
-            children = (D6120000000000000000000C, D6120000000000000000000D);
+            children = (D6120000000000000000000C, D6120000000000000000000D, D61200000000000000000019, D6120000000000000000001A);
             path = Resources;
             sourceTree = "<group>";
         };
@@ -76,7 +76,7 @@
         D6120000000000000000000A = {
             isa = PBXResourcesBuildPhase;
             buildActionMask = 2147483647;
-            files = (D6120000000000000000000B);
+            files = (D6120000000000000000000B, D6120000000000000000001B, D6120000000000000000001C);
             runOnlyForDeploymentPostprocessing = 0;
         };
         D6120000000000000000000B = {
@@ -136,18 +136,19 @@
             buildSettings = {
                 CODE_SIGN_IDENTITY = "-";
                 CODE_SIGN_STYLE = Manual;
-                CURRENT_PROJECT_VERSION = 13;
+                CURRENT_PROJECT_VERSION = 15;
                 ENABLE_APP_SANDBOX = NO;
                 ENABLE_HARDENED_RUNTIME = YES;
                 GENERATE_INFOPLIST_FILE = NO;
                 INFOPLIST_FILE = Resources/Info.plist;
                 LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
-                MARKETING_VERSION = 0.6.4;
+                MARKETING_VERSION = 0.7.0;
                 PRODUCT_BUNDLE_IDENTIFIER = studio.papercursor.macos;
                 PRODUCT_MODULE_NAME = Tipwink;
                 PRODUCT_NAME = Tipwink;
                 SWIFT_APPROACHABLE_CONCURRENCY = YES;
                 SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+                SWIFT_EMIT_LOC_STRINGS = YES;
                 SWIFT_VERSION = 6.0;
             };
             name = Debug;
@@ -157,18 +158,19 @@
             buildSettings = {
                 CODE_SIGN_IDENTITY = "-";
                 CODE_SIGN_STYLE = Manual;
-                CURRENT_PROJECT_VERSION = 13;
+                CURRENT_PROJECT_VERSION = 15;
                 ENABLE_APP_SANDBOX = NO;
                 ENABLE_HARDENED_RUNTIME = YES;
                 GENERATE_INFOPLIST_FILE = NO;
                 INFOPLIST_FILE = Resources/Info.plist;
                 LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
-                MARKETING_VERSION = 0.6.4;
+                MARKETING_VERSION = 0.7.0;
                 PRODUCT_BUNDLE_IDENTIFIER = studio.papercursor.macos;
                 PRODUCT_MODULE_NAME = Tipwink;
                 PRODUCT_NAME = Tipwink;
                 SWIFT_APPROACHABLE_CONCURRENCY = YES;
                 SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+                SWIFT_EMIT_LOC_STRINGS = YES;
                 SWIFT_VERSION = 6.0;
             };
             name = Release;
@@ -186,6 +188,26 @@
         D61200000000000000000018 = {
             isa = PBXBuildFile;
             productRef = D61200000000000000000017;
+        };
+        D61200000000000000000019 = {
+            isa = PBXFileReference;
+            lastKnownFileType = text.json.xcstrings;
+            path = Localizable.xcstrings;
+            sourceTree = "<group>";
+        };
+        D6120000000000000000001A = {
+            isa = PBXFileReference;
+            lastKnownFileType = text.json.xcstrings;
+            path = InfoPlist.xcstrings;
+            sourceTree = "<group>";
+        };
+        D6120000000000000000001B = {
+            isa = PBXBuildFile;
+            fileRef = D61200000000000000000019;
+        };
+        D6120000000000000000001C = {
+            isa = PBXBuildFile;
+            fileRef = D6120000000000000000001A;
         };
     };
     rootObject = D61200000000000000000001;

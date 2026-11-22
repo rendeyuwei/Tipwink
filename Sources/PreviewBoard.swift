@@ -6,7 +6,7 @@ enum PreviewBackground: String, CaseIterable, Identifiable {
     case dark
 
     var id: Self { self }
-    var title: String { self == .light ? "浅色" : "深色" }
+    var title: LocalizedStringResource { self == .light ? "Light" : "Dark" }
     var base: Color {
         self == .light ? Color(red: 0.964, green: 0.917, blue: 0.86) : Color(red: 0.15, green: 0.128, blue: 0.132)
     }
@@ -41,15 +41,16 @@ struct PreviewBoard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label("试用区", systemImage: "cursorarrow.motionlines")
+            Label("Try a Theme", systemImage: "cursorarrow.motionlines")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(background.ink.opacity(0.74))
                 .accessibilityAddTraits(.isHeader)
 
             HStack(spacing: 0) {
                 tile(.arrow) {
+                    let title: LocalizedStringResource = clicked ? "Clicked" : "Click Here"
                     SampleButton(settings: settings, role: .arrow, expression: expression(for: .arrow),
-                                 title: clicked ? "已点中" : "点一下", color: background.ink) {
+                                 title: title, color: background.ink) {
                         clicked.toggle()
                         blink(.arrow)
                     }
@@ -59,8 +60,9 @@ struct PreviewBoard: View {
 
                 separator
                 tile(.link) {
+                    let title: LocalizedStringResource = opened ? "Link Opened" : "Try a Link"
                     SampleButton(settings: settings, role: .link, expression: expression(for: .link),
-                                 title: opened ? "已打开" : "试用链接", color: background.accent) {
+                                 title: title, color: background.accent) {
                         opened.toggle()
                         blink(.link)
                     }
@@ -142,7 +144,7 @@ struct PreviewBoard: View {
 
     private var dragTrack: some View {
         HStack(spacing: 10) {
-            Text("拖动")
+            Text("Drag")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(background.ink.opacity(0.7))
             GeometryReader { proxy in
@@ -171,7 +173,7 @@ struct PreviewBoard: View {
                                 dragProgress = min(1, max(0, dragProgress + value.translation.width / travel))
                             }
                     )
-                    .accessibilityLabel("拖动试用")
+                    .accessibilityLabel("Try Dragging")
                     .accessibilityValue(Double(dragProgress).formatted(.percent.precision(.fractionLength(0))))
                     .accessibilityAdjustableAction { direction in
                         switch direction {
@@ -207,7 +209,7 @@ private struct SampleButton: NSViewRepresentable {
     let settings: ThemeSettings
     let role: CursorRole
     let expression: CatExpression
-    let title: String
+    let title: LocalizedStringResource
     let color: Color
     let onPress: () -> Void
 
@@ -241,8 +243,9 @@ private struct SampleButton: NSViewRepresentable {
             .foregroundColor: NSColor(color)
         ]
         if role == .link { attributes[.underlineStyle] = NSUnderlineStyle.single.rawValue }
-        button.attributedTitle = NSAttributedString(string: title, attributes: attributes)
-        button.setAccessibilityLabel(title)
+        let localizedTitle = String(localized: title)
+        button.attributedTitle = NSAttributedString(string: localizedTitle, attributes: attributes)
+        button.setAccessibilityLabel(localizedTitle)
         let coordinator = context.coordinator
         if coordinator.lastSettings != settings {
             coordinator.openCursor = CursorArtwork.cursor(settings, role: role)
@@ -279,7 +282,7 @@ private struct SampleText: NSViewRepresentable {
 
     func makeNSView(context: Context) -> CursorSampleText {
         let field = CursorSampleText()
-        field.stringValue = "选中这行字"
+        field.stringValue = String(localized: "Select this text")
         field.font = .systemFont(ofSize: 12)
         field.alignment = .center
         field.isBordered = false

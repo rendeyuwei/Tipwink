@@ -1,0 +1,686 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "A little cat rests beside the arrow and blinks when you click." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小猫趴在箭头边，点一下就眨眼。"
+          }
+        }
+      }
+    },
+    "A short amber pencil that clicks with its tip." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "琥珀色短铅笔，用笔尖指向和点击。"
+          }
+        }
+      }
+    },
+    "Active on Desktop" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "桌面正在使用"
+          }
+        }
+      }
+    },
+    "Another copy of Tipwink is restoring the cursor. Try again in a moment." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "另一个纸尖进程正在处理恢复，请稍后重试。"
+          }
+        }
+      }
+    },
+    "Applied" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已应用"
+          }
+        }
+      }
+    },
+    "Apply After Reset…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重设后应用…"
+          }
+        }
+      }
+    },
+    "Apply Theme" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用主题"
+          }
+        }
+      }
+    },
+    "Apply to Desktop" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用到桌面"
+          }
+        }
+      }
+    },
+    "Automatically Check for Updates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动检查更新"
+          }
+        }
+      }
+    },
+    "Breed" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "品种"
+          }
+        }
+      }
+    },
+    "British Blue" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "英短蓝猫"
+          }
+        }
+      }
+    },
+    "Cat Only" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纯猫"
+          }
+        }
+      }
+    },
+    "Check for Updates…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检查更新…"
+          }
+        }
+      }
+    },
+    "Choose the fill and outline colors separately." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自由搭配填充和描边，做一套日常指针。"
+          }
+        }
+      }
+    },
+    "Classic" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "经典"
+          }
+        }
+      }
+    },
+    "Click Here" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点一下"
+          }
+        }
+      }
+    },
+    "Clicked" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已点中"
+          }
+        }
+      }
+    },
+    "Couldn’t create the cursor image. Try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指针图像未能生成，请重试。"
+          }
+        }
+      }
+    },
+    "Couldn’t read the original cursor backup. Applying desktop themes is paused." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原光标的恢复记录无法读取，桌面主题已暂停应用。"
+          }
+        }
+      }
+    },
+    "Cursor" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "光标"
+          }
+        }
+      }
+    },
+    "Cursor Size" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "光标大小"
+          }
+        }
+      }
+    },
+    "Cursor Themes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "光标主题"
+          }
+        }
+      }
+    },
+    "Custom system pointer colors override desktop themes. Open Settings below and click Reset Colors. Tipwink will apply the theme when you return. You can keep your pointer size." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统自定义指针颜色会覆盖桌面主题。用下方按钮打开设置，点「重设颜色」，回到纸尖时会自动应用。指针大小可以保留。"
+          }
+        }
+      }
+    },
+    "Dark" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "深色"
+          }
+        }
+      }
+    },
+    "Desktop themes are unavailable on this Mac. You can still try them in the preview." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前 macOS 上暂时无法应用桌面主题。你仍可在窗口内试用。"
+          }
+        }
+      }
+    },
+    "Drag" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖动"
+          }
+        }
+      }
+    },
+    "Fill" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "填充"
+          }
+        }
+      }
+    },
+    "Go to System Settings → Accessibility → Display. Under Pointer, click Reset Colors." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请手动打开「系统设置 → 辅助功能 → 显示」，在「指针」中点「重设颜色」。"
+          }
+        }
+      }
+    },
+    "Light" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浅色"
+          }
+        }
+      }
+    },
+    "Link" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "链接"
+          }
+        }
+      }
+    },
+    "Link Opened" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已打开"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好"
+          }
+        }
+      }
+    },
+    "Open Theme Library" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开主题库"
+          }
+        }
+      }
+    },
+    "Orange Tabby" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "橘纹美短"
+          }
+        }
+      }
+    },
+    "Outline" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "描边"
+          }
+        }
+      }
+    },
+    "Paper Cat" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸片猫"
+          }
+        }
+      }
+    },
+    "Paper Cat Breed" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸片猫品种"
+          }
+        }
+      }
+    },
+    "Paper Cat Style" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸片猫样式"
+          }
+        }
+      }
+    },
+    "Pencil" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "铅笔"
+          }
+        }
+      }
+    },
+    "Pixel Jelly" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "像素果冻"
+          }
+        }
+      }
+    },
+    "Point with the tip of the left ear. The cat blinks on click and raises a paw over links." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用左耳尖指向，点一下就眨眼。遇到链接会抬爪。"
+          }
+        }
+      }
+    },
+    "Pointer" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指向"
+          }
+        }
+      }
+    },
+    "Preview Background" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预览背景"
+          }
+        }
+      }
+    },
+    "Purple pixels with a touch of mint." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "葡萄紫和薄荷绿，像一颗小小的像素糖。"
+          }
+        }
+      }
+    },
+    "Quit Tipwink" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出纸尖"
+          }
+        }
+      }
+    },
+    "Ragdoll" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "布偶猫"
+          }
+        }
+      }
+    },
+    "Reset Colors" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重置配色"
+          }
+        }
+      }
+    },
+    "Reset system pointer colors to apply a theme" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重设系统指针颜色后即可应用"
+          }
+        }
+      }
+    },
+    "Restore Original Cursor" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复原光标"
+          }
+        }
+      }
+    },
+    "Restore Pending" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "等待恢复"
+          }
+        }
+      }
+    },
+    "Select this text" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选中这行字"
+          }
+        }
+      }
+    },
+    "Size" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大小"
+          }
+        }
+      }
+    },
+    "Style" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "样式"
+          }
+        }
+      }
+    },
+    "System Cursor" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统光标"
+          }
+        }
+      }
+    },
+    "Text" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字"
+          }
+        }
+      }
+    },
+    "The system couldn’t finish refreshing the cursor (%d)." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统未能结束刷新光标（%d）。"
+          }
+        }
+      }
+    },
+    "The system couldn’t read the cursor (%d)." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统未能读取光标（%d）。"
+          }
+        }
+      }
+    },
+    "The system couldn’t refresh the cursor (%d)." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统未能刷新光标（%d）。"
+          }
+        }
+      }
+    },
+    "The system couldn’t register the cursor (%d)." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统未能登记光标（%d）。"
+          }
+        }
+      }
+    },
+    "The system couldn’t remove the cursor (%d)." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统未能移除光标（%d）。"
+          }
+        }
+      }
+    },
+    "The theme was only partially applied. Restore the original cursor before trying again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主题未能完整应用，请先恢复原光标。"
+          }
+        }
+      }
+    },
+    "This version can’t check for updates online." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此版本无法在线检查更新"
+          }
+        }
+      }
+    },
+    "Tipwink" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸尖"
+          }
+        }
+      }
+    },
+    "Try Dragging" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖动试用"
+          }
+        }
+      }
+    },
+    "Try a Link" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试用链接"
+          }
+        }
+      }
+    },
+    "Try a Theme" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试用区"
+          }
+        }
+      }
+    },
+    "Two-Tone Arrow" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "双色箭头"
+          }
+        }
+      }
+    },
+    "You’re running version %@." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前版本为 %@。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

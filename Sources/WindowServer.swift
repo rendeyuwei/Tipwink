@@ -37,16 +37,34 @@ enum DesktopCursorError: LocalizedError {
     case artwork
     case recoveryData
     case restoreRequired
-    case windowServer(String, Int32)
+    case readCursor(Int32)
+    case removeCursor(Int32)
+    case registerCursor(Int32)
+    case refreshCursor(Int32)
+    case finishRefreshingCursor(Int32)
 
     var errorDescription: String? {
         switch self {
-        case .unavailable: "当前 macOS 上暂时无法应用桌面主题。你仍可在窗口内试用。"
-        case .busy: "另一个纸尖进程正在处理恢复，请稍后重试。"
-        case .artwork: "指针图像未能生成，请重试。"
-        case .recoveryData: "原光标的恢复记录无法读取，桌面主题已暂停应用。"
-        case .restoreRequired: "主题未能完整应用，请先恢复原光标。"
-        case let .windowServer(action, code): "系统未能\(action)光标（\(code)）。"
+        case .unavailable:
+            String(localized: "Desktop themes are unavailable on this Mac. You can still try them in the preview.")
+        case .busy:
+            String(localized: "Another copy of Tipwink is restoring the cursor. Try again in a moment.")
+        case .artwork:
+            String(localized: "Couldn’t create the cursor image. Try again.")
+        case .recoveryData:
+            String(localized: "Couldn’t read the original cursor backup. Applying desktop themes is paused.")
+        case .restoreRequired:
+            String(localized: "The theme was only partially applied. Restore the original cursor before trying again.")
+        case let .readCursor(code):
+            String(localized: "The system couldn’t read the cursor (\(code)).")
+        case let .removeCursor(code):
+            String(localized: "The system couldn’t remove the cursor (\(code)).")
+        case let .registerCursor(code):
+            String(localized: "The system couldn’t register the cursor (\(code)).")
+        case let .refreshCursor(code):
+            String(localized: "The system couldn’t refresh the cursor (\(code)).")
+        case let .finishRefreshingCursor(code):
+            String(localized: "The system couldn’t finish refreshing the cursor (\(code)).")
         }
     }
 }
@@ -106,7 +124,7 @@ struct WindowServer {
         let status = copy(connection, name, &size, &hotSpot, &frameCount, &duration, &images)
         let representations = images?.takeRetainedValue() as? [CGImage]
         if status == Self.cursorNotFound { return nil }
-        guard status == 0 else { throw DesktopCursorError.windowServer("读取", status) }
+        guard status == 0 else { throw DesktopCursorError.readCursor(status) }
         guard let representations, !representations.isEmpty, size.width > 0, size.height > 0 else {
             throw DesktopCursorError.recoveryData
         }
@@ -125,7 +143,9 @@ struct WindowServer {
             status = remove(connection, name, globally)
             if status == Self.cursorNotFound { return }
         }
-        guard status == 0 else { throw DesktopCursorError.windowServer(value == nil ? "移除" : "登记", status) }
+        guard status == 0 else {
+            throw value == nil ? DesktopCursorError.removeCursor(status) : DesktopCursorError.registerCursor(status)
+        }
     }
 
     func refreshArrow() throws {
@@ -137,12 +157,12 @@ struct WindowServer {
         // from the menu bar or recovery process while another app has focus.
         let key = "SetsCursorInBackground" as CFString
         let enable = setProperty(connection, connection, key, kCFBooleanTrue)
-        guard enable == 0 else { throw DesktopCursorError.windowServer("刷新", enable) }
+        guard enable == 0 else { throw DesktopCursorError.refreshCursor(enable) }
         var seed: Int32 = 0
         let selected = select(connection, name, &seed)
         let reset = setProperty(connection, connection, key, kCFBooleanFalse)
-        guard selected == 0 else { throw DesktopCursorError.windowServer("刷新", selected) }
-        guard reset == 0 else { throw DesktopCursorError.windowServer("结束刷新", reset) }
+        guard selected == 0 else { throw DesktopCursorError.refreshCursor(selected) }
+        guard reset == 0 else { throw DesktopCursorError.finishRefreshingCursor(reset) }
     }
 
 }

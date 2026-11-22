@@ -34,11 +34,11 @@ final class SoftwareUpdates: ObservableObject {
             controller.checkForUpdates(nil)
         } else {
             let alert = NSAlert()
-            alert.messageText = "此版本无法在线检查更新"
+            alert.messageText = String(localized: "This version can’t check for updates online.")
             if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
-                alert.informativeText = "当前版本为 \(version)。"
+                alert.informativeText = String(localized: "You’re running version \(version).")
             }
-            alert.addButton(withTitle: "好")
+            alert.addButton(withTitle: String(localized: "OK"))
             alert.runModal()
         }
     }
@@ -65,12 +65,12 @@ struct UpdateMenuItems: View {
     @ObservedObject var updates: SoftwareUpdates
 
     var body: some View {
-        Button("检查更新…") { updates.checkForUpdates() }
+        Button("Check for Updates…") { updates.checkForUpdates() }
             .disabled(updates.isConfigured && !updates.canCheckForUpdates)
 
         if updates.isConfigured {
             Toggle(
-                "自动检查更新",
+                "Automatically Check for Updates",
                 isOn: Binding(
                     get: { updates.automaticallyChecksForUpdates },
                     set: { updates.setAutomaticChecks($0) }

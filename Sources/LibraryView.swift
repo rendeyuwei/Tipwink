@@ -44,7 +44,7 @@ struct LibraryView: View {
 
     private var themeList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("光标主题")
+            Text("Cursor Themes")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .padding(.leading, 9)
@@ -96,23 +96,24 @@ struct LibraryView: View {
         }
         .buttonStyle(ThemeSelectionStyle(selected: selected, accent: inkAccent))
         .accessibilityAddTraits(selected ? .isSelected : [])
-        .accessibilityValue(library.applied?.theme == theme ? "桌面正在使用" : "")
+        .accessibilityValue(library.applied?.theme == theme ? Text("Active on Desktop") : Text(verbatim: ""))
         .accessibilityIdentifier("theme-\(theme.rawValue)")
     }
 
     private var desktopStatus: some View {
-        VStack(alignment: .leading, spacing: 11) {
+        let status: LocalizedStringResource = library.needsRecovery ? "Restore Pending" : "Active on Desktop"
+        return VStack(alignment: .leading, spacing: 11) {
             Divider()
             HStack(spacing: 8) {
                 Circle()
                     .fill(library.applied == nil ? Color.secondary.opacity(0.7) : inkAccent)
                     .frame(width: 6, height: 6)
                     .accessibilityHidden(true)
-                Text(library.needsRecovery ? "等待恢复" : "桌面正在使用")
+                Text(status)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
             }
-            Text(library.applied?.theme.name ?? "系统光标")
+            Text(library.applied?.theme.name ?? "System Cursor")
                 .font(.system(size: 14, weight: .semibold))
                 .accessibilityIdentifier("desktop-status")
         }
@@ -131,7 +132,7 @@ struct LibraryView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 2)
-            Picker("预览背景", selection: $background) {
+            Picker("Preview Background", selection: $background) {
                 ForEach(PreviewBackground.allCases) { mode in
                     Text(mode.title).tag(mode)
                 }
@@ -147,10 +148,10 @@ struct LibraryView: View {
     private var adjustments: some View {
         VStack(spacing: 9) {
             HStack(spacing: 12) {
-                Label("大小", systemImage: "arrow.up.left.and.arrow.down.right")
+                Label("Size", systemImage: "arrow.up.left.and.arrow.down.right")
                     .font(.system(size: 13, weight: .medium))
                     .frame(width: 68, alignment: .leading)
-                Slider(value: $library.settings.scale, in: 0.75...1.5, step: 0.05) { Text("光标大小") }
+                Slider(value: $library.settings.scale, in: 0.75...1.5, step: 0.05) { Text("Cursor Size") }
                     .labelsHidden()
                     .accessibilityIdentifier("cursor-size")
                 Text(library.settings.scale.formatted(.percent.precision(.fractionLength(0))))
@@ -163,10 +164,10 @@ struct LibraryView: View {
             if library.settings.theme == .paperCat {
                 Divider()
                 HStack(spacing: 12) {
-                    Label("样式", systemImage: "pawprint")
+                    Label("Style", systemImage: "pawprint")
                         .font(.system(size: 13, weight: .medium))
                         .frame(width: 68, alignment: .leading)
-                    Picker("纸片猫样式", selection: $library.settings.paperCatStyle) {
+                    Picker("Paper Cat Style", selection: $library.settings.paperCatStyle) {
                         ForEach(PaperCatStyle.allCases) { style in
                             Text(style.title).tag(style)
                         }
@@ -182,12 +183,12 @@ struct LibraryView: View {
             } else if library.settings.theme == .twoTone {
                 Divider()
                 HStack(spacing: 23) {
-                    ColorPicker("填充", selection: colorBinding(\.fill), supportsOpacity: false)
+                    ColorPicker("Fill", selection: colorBinding(\.fill), supportsOpacity: false)
                         .accessibilityIdentifier("fill-color")
-                    ColorPicker("描边", selection: colorBinding(\.outline), supportsOpacity: false)
+                    ColorPicker("Outline", selection: colorBinding(\.outline), supportsOpacity: false)
                         .accessibilityIdentifier("outline-color")
                     Spacer()
-                    Button("重置配色") {
+                    Button("Reset Colors") {
                         library.settings.fill = ThemeSettings().fill
                         library.settings.outline = ThemeSettings().outline
                     }
@@ -203,7 +204,7 @@ struct LibraryView: View {
 
     private var breedPicker: some View {
         HStack(spacing: 12) {
-            Label("品种", systemImage: "cat")
+            Label("Breed", systemImage: "cat")
                 .font(.system(size: 13, weight: .medium))
                 .frame(width: 68, alignment: .leading)
                 .accessibilityHidden(true)
@@ -213,7 +214,7 @@ struct LibraryView: View {
                 }
             }
             .accessibilityElement(children: .contain)
-            .accessibilityLabel("纸片猫品种")
+            .accessibilityLabel("Paper Cat Breed")
         }
     }
 
@@ -231,7 +232,7 @@ struct LibraryView: View {
                 .offset(y: 2)
                 Text(breed.title)
                     .font(.system(size: 13, weight: selected ? .semibold : .medium))
-                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
                 Image(systemName: "checkmark")
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(inkAccent)
@@ -259,7 +260,7 @@ struct LibraryView: View {
     private var actions: some View {
         VStack(alignment: .leading, spacing: 9) {
             if library.hasPointerColorConflict {
-                Text("系统自定义指针颜色会覆盖桌面主题。用下方按钮打开设置，点「重设颜色」，回到纸尖时会自动应用。指针大小可以保留。")
+                Text("Custom system pointer colors override desktop themes. Open Settings below and click Reset Colors. Tipwink will apply the theme when you return. You can keep your pointer size.")
                     .font(.system(size: 12))
                     .foregroundStyle(inkAccent)
                     .fixedSize(horizontal: false, vertical: true)
@@ -272,21 +273,20 @@ struct LibraryView: View {
             }
             HStack(spacing: 12) {
                 Spacer()
-                Button("恢复原光标") { library.restore() }
+                Button("Restore Original Cursor") { library.restore() }
                     .disabled(library.applied == nil && !library.needsRecovery)
                     .accessibilityIdentifier("restore-cursor")
                 if library.hasPointerColorConflict {
-                    Button("重设后应用…") { library.applyAfterColorReset() }
+                    Button("Apply After Reset…") { library.applyAfterColorReset() }
                         .buttonStyle(.borderedProminent)
                         .accessibilityIdentifier("open-pointer-settings")
                 } else {
-                    Button(library.canApplyManually ? "应用到桌面" : "已应用") {
-                        library.apply()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .keyboardShortcut(.return, modifiers: .command)
-                    .disabled(!library.canApplyManually)
-                    .accessibilityIdentifier("apply-theme")
+                    let title: LocalizedStringResource = library.canApplyManually ? "Apply to Desktop" : "Applied"
+                    Button(title) { library.apply() }
+                        .buttonStyle(.borderedProminent)
+                        .keyboardShortcut(.return, modifiers: .command)
+                        .disabled(!library.canApplyManually)
+                        .accessibilityIdentifier("apply-theme")
                 }
             }
             .controlSize(.large)

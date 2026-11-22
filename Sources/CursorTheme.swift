@@ -9,11 +9,11 @@ enum CursorRole: String, CaseIterable {
     static let catEar = CGPoint(x: 6, y: 5)
     static let pencilTip = CGPoint(x: 5, y: 4)
 
-    var title: String {
+    var title: LocalizedStringResource {
         switch self {
-        case .arrow: "指向"
-        case .link: "链接"
-        case .text: "文字"
+        case .arrow: "Pointer"
+        case .link: "Link"
+        case .text: "Text"
         }
     }
 
@@ -39,17 +39,17 @@ enum PaperCatStyle: String, CaseIterable, Identifiable, Codable {
 
     var id: Self { self }
 
-    var title: String {
+    var title: LocalizedStringResource {
         switch self {
-        case .classic: "经典"
-        case .catOnly: "纯猫"
+        case .classic: "Classic"
+        case .catOnly: "Cat Only"
         }
     }
 
-    var detail: String {
+    var detail: LocalizedStringResource {
         switch self {
-        case .classic: "小猫趴在箭头边，点一下就眨眼。"
-        case .catOnly: "用左耳尖指向，点一下就眨眼。遇到链接会抬爪。"
+        case .classic: "A little cat rests beside the arrow and blinks when you click."
+        case .catOnly: "Point with the tip of the left ear. The cat blinks on click and raises a paw over links."
         }
     }
 }
@@ -61,11 +61,11 @@ enum PaperCatBreed: String, CaseIterable, Identifiable, Codable {
 
     var id: Self { self }
 
-    var title: String {
+    var title: LocalizedStringResource {
         switch self {
-        case .orangeTabby: "橘纹美短"
-        case .britishBlue: "英短蓝猫"
-        case .ragdoll: "布偶猫"
+        case .orangeTabby: "Orange Tabby"
+        case .britishBlue: "British Blue"
+        case .ragdoll: "Ragdoll"
         }
     }
 }
@@ -92,21 +92,21 @@ enum CursorTheme: String, CaseIterable, Identifiable, Codable {
 
     var id: Self { self }
 
-    var name: String {
+    var name: LocalizedStringResource {
         switch self {
-        case .paperCat: "纸片猫"
-        case .pixelJelly: "像素果冻"
-        case .twoTone: "双色箭头"
-        case .pencil: "铅笔"
+        case .paperCat: "Paper Cat"
+        case .pixelJelly: "Pixel Jelly"
+        case .twoTone: "Two-Tone Arrow"
+        case .pencil: "Pencil"
         }
     }
 
-    var detail: String {
+    var detail: LocalizedStringResource {
         switch self {
         case .paperCat: PaperCatStyle.classic.detail
-        case .pixelJelly: "葡萄紫和薄荷绿，像一颗小小的像素糖。"
-        case .twoTone: "自由搭配填充和描边，做一套日常指针。"
-        case .pencil: "琥珀色短铅笔，用笔尖指向和点击。"
+        case .pixelJelly: "Purple pixels with a touch of mint."
+        case .twoTone: "Choose the fill and outline colors separately."
+        case .pencil: "A short amber pencil that clicks with its tip."
         }
     }
 
@@ -150,7 +150,7 @@ struct ThemeSettings: Codable, Equatable {
     var paperCatStyle: PaperCatStyle = .classic
     var paperCatBreed: PaperCatBreed = .orangeTabby
 
-    var detail: String { theme == .paperCat ? paperCatStyle.detail : theme.detail }
+    var detail: LocalizedStringResource { theme == .paperCat ? paperCatStyle.detail : theme.detail }
 
     var imageSize: CGSize {
         CGSize(width: (32 * scale).rounded(), height: (36 * scale).rounded())
