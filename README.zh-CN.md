@@ -4,21 +4,21 @@
 
 在浅色和深色背景下试用普通指针、链接手形和文字光标，再将喜欢的主题应用到桌面。
 
-**[下载 Mac 内测版](https://github.com/rendeyuwei/Tipwink/releases)** · [English](README.md)
+**[下载 Mac 版](https://github.com/rendeyuwei/Tipwink/releases/latest/download/Tipwink-macOS-arm64.zip)** · [发行说明](https://github.com/rendeyuwei/Tipwink/releases/latest) · [English](README.md)
 
 搭载 Apple 芯片的 Mac · macOS 26 或更高版本
 
 ![纸片猫、像素果冻、双色箭头和铅笔的浅色与深色预览](docs/images/cursor-preview.png)
 
-*预览和主题表展示当前开发版。* [内测发布说明](https://github.com/rendeyuwei/Tipwink/releases)
-
 ## 开始使用
 
-1. 下载并解压 `Tipwink-…-macOS-arm64.zip`，将 `Tipwink.app` 移到「应用程序」，然后打开。
+1. 下载并解压 `Tipwink-macOS-arm64.zip`，将 `Tipwink.app` 移到「应用程序」，然后打开。
 2. 选一套主题，在试用区试点按钮、预览链接手形、选字或拖动。光标大小可在 75% 至 150% 之间调整。
 3. 点击「应用到桌面」。应用后，调整主题、样式、大小和配色会即时生效。
 
-点击菜单栏的光标图标，可以重新打开主题库、切换主题或检查更新。要换回原光标，在主题库窗口或菜单栏选择「恢复原光标」。
+点击菜单栏的光标图标，可以重新打开主题库或切换主题。要换回原光标，在主题库窗口或菜单栏选择「恢复原光标」。
+
+更新时，退出纸尖，用最新安装包中的应用替换「应用程序」里的纸尖。[发行说明](https://github.com/rendeyuwei/Tipwink/releases/latest)
 
 ## 光标主题
 
@@ -35,7 +35,7 @@
 
 macOS 自定义指针颜色会覆盖桌面主题。如果纸尖显示「重设后应用…」，点开后在「显示」设置的「指针」一栏选择「重设颜色」，再返回纸尖即可应用选中的主题。[Apple 指针设置指南](https://support.apple.com/zh-cn/guide/mac-help/mchlp2920/mac)
 
-内测安装包使用 Apple Development 证书签名。
+下载包使用 Developer ID 签名，并通过 Apple 公证。
 
 ## 问题与反馈
 

@@ -4,21 +4,21 @@
 
 Try the pointer, link hand, and text cursor on light and dark backgrounds. When you find a theme you like, apply it to your desktop.
 
-**[Download for Mac](https://github.com/rendeyuwei/Tipwink/releases)** · [简体中文](README.zh-CN.md)
+**[Download for Mac](https://github.com/rendeyuwei/Tipwink/releases/latest/download/Tipwink-macOS-arm64.zip)** · [Release notes](https://github.com/rendeyuwei/Tipwink/releases/latest) · [简体中文](README.zh-CN.md)
 
-Apple silicon · macOS 26 or later · Pilot release
+Apple silicon · macOS 26 or later
 
 ![Paper Cat, Pixel Jelly, Two-Tone Arrow, and Pencil on light and dark backgrounds](docs/images/cursor-preview.png)
 
-*The preview and theme list show the current development build.* [Pilot release notes](https://github.com/rendeyuwei/Tipwink/releases)
-
 ## Get started
 
-1. Download and unzip `Tipwink-…-macOS-arm64.zip`. Move `Tipwink.app` to Applications and open it.
+1. Download and unzip `Tipwink-macOS-arm64.zip`. Move `Tipwink.app` to Applications and open it.
 2. Choose a theme. Try clicking, hovering over the sample link, selecting text, and dragging in the preview. The size slider ranges from 75% to 150%.
 3. Choose **应用到桌面** (Apply to Desktop). Once applied, changes to the theme, style, size, and colors take effect as you make them.
 
-The menu bar icon lets you reopen the library, switch themes, and check for updates. Choose **恢复原光标** (Restore Original Cursor) in the library or the menu bar to switch back.
+The menu bar icon lets you reopen the library and switch themes. Choose **恢复原光标** (Restore Original Cursor) in the library or the menu bar to switch back.
+
+To update, quit Tipwink and replace it in Applications with the latest download. [Release notes](https://github.com/rendeyuwei/Tipwink/releases/latest)
 
 ## Themes
 
@@ -35,7 +35,7 @@ Desktop themes apply to the macOS system cursors. Apps and system views can disp
 
 Custom macOS pointer colors can override a theme. If Tipwink shows **重设后应用…** (Apply After Reset), choose it, select **Reset Colors** under **Pointer** in Display settings, and return to Tipwink to apply the selected theme. [Apple’s pointer settings guide](https://support.apple.com/guide/mac-help/mchlp2920/mac)
 
-Pilot downloads are signed with an Apple Development certificate.
+The direct download is signed with Developer ID and notarized by Apple.
 
 ## Feedback
 
