@@ -16,7 +16,7 @@ Apple silicon · macOS 26 or later
 
 1. Download and unzip `Tipwink-macOS-arm64.zip`. Move `Tipwink.app` to Applications and open it.
 2. Choose a theme. Try clicking, hovering over the sample link, selecting text, and dragging in the preview. The size slider ranges from 75% to 150%.
-3. Choose **Apply to Desktop** (应用到桌面). Once applied, changes to the theme, style, size, and colors take effect as you make them.
+3. Choose **Apply to Desktop** (应用到桌面). Once applied, changes to the theme, style, breed, size, and colors take effect as you make them.
 
 The menu bar icon lets you reopen the library and switch themes. Choose **Restore Original Cursor** (恢复原光标) in the library or the menu bar to switch back.
 
@@ -26,9 +26,9 @@ To update, quit Tipwink and replace it in Applications with the latest download.
 
 | Theme | Description |
 | --- | --- |
-| **Paper Cat** | A cat that blinks when you click. Cat Only mode (纯猫) uses the tip of an ear for pointing and a raised paw for links. |
+| **Paper Cat** | Choose an orange tabby, British Blue, or Ragdoll. The cat blinks when you click. Cat Only mode (纯猫) uses the tip of an ear for pointing and a raised paw for links. |
 | **Pixel Jelly** | Pixel-art cursors in purple with mint accents. |
-| **Two-Tone Arrow** | A classic cursor set with independent fill and outline colors. |
+| **Two-Tone Arrow** | A bright pink cursor with a deep berry outline. Both colors are adjustable. |
 | **Pencil** | A short amber pencil with the click point at its tip. |
 
 ## Compatibility

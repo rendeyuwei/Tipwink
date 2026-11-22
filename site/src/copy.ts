@@ -36,7 +36,7 @@ export const copy = {
     library: "The theme library",
     tryTheme: "Try",
     themes: {
-      paperCat: { name: "Paper Cat", detail: "A companion that blinks when you click." },
+      paperCat: { name: "Paper Cat", detail: "A cat that blinks on click. Choose from three breeds in the app." },
       pixelJelly: { name: "Pixel Jelly", detail: "Purple pixels with a touch of mint." },
       twoTone: { name: "Two-Tone Arrow", detail: "Choose the fill and outline colors separately." },
       pencil: { name: "Pencil", detail: "A short amber pencil that clicks with its tip." },
@@ -84,7 +84,7 @@ export const copy = {
     library: "光标主题库",
     tryTheme: "试用",
     themes: {
-      paperCat: { name: "纸片猫", detail: "陪在指针旁边的小猫，点击时会眨眼。" },
+      paperCat: { name: "纸片猫", detail: "点击时会眨眼，可在 App 里一键切换三种小猫。" },
       pixelJelly: { name: "像素果冻", detail: "紫色像素，点缀一抹薄荷绿。" },
       twoTone: { name: "双色箭头", detail: "填充色和描边色可以分别调整。" },
       pencil: { name: "铅笔", detail: "琥珀色短铅笔，点击落点在笔尖。" },

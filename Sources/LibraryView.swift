@@ -38,7 +38,7 @@ struct LibraryView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(surface)
         }
-        .frame(minWidth: 760, minHeight: 540)
+        .frame(minWidth: 760, minHeight: 580)
         .tint(inkAccent)
     }
 
@@ -75,8 +75,12 @@ struct LibraryView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(theme.swatch)
-                    CursorDrawing(settings: ThemeSettings(theme: theme, paperCatStyle: library.settings.paperCatStyle), role: .arrow)
-                        .frame(width: 31, height: 35)
+                    CursorDrawing(settings: ThemeSettings(
+                        theme: theme,
+                        paperCatStyle: library.settings.paperCatStyle,
+                        paperCatBreed: library.settings.paperCatBreed
+                    ), role: .arrow)
+                    .frame(width: 31, height: 35)
                 }
                 .frame(width: 41, height: 41)
                 Text(theme.name)
@@ -89,9 +93,8 @@ struct LibraryView: View {
                 }
             }
             .padding(7)
-            .contentShape(RoundedRectangle(cornerRadius: 13))
         }
-        .buttonStyle(ThemeRowStyle(selected: selected, accent: inkAccent))
+        .buttonStyle(ThemeSelectionStyle(selected: selected, accent: inkAccent))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityValue(library.applied?.theme == theme ? "桌面正在使用" : "")
         .accessibilityIdentifier("theme-\(theme.rawValue)")
@@ -142,7 +145,7 @@ struct LibraryView: View {
     }
 
     private var adjustments: some View {
-        VStack(spacing: 13) {
+        VStack(spacing: 9) {
             HStack(spacing: 12) {
                 Label("大小", systemImage: "arrow.up.left.and.arrow.down.right")
                     .font(.system(size: 13, weight: .medium))
@@ -174,6 +177,8 @@ struct LibraryView: View {
                     .accessibilityIdentifier("cat-style")
                     Spacer()
                 }
+                Divider()
+                breedPicker
             } else if library.settings.theme == .twoTone {
                 Divider()
                 HStack(spacing: 23) {
@@ -194,6 +199,53 @@ struct LibraryView: View {
         .padding(.horizontal, 15)
         .padding(.vertical, 12)
         .background(.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var breedPicker: some View {
+        HStack(spacing: 12) {
+            Label("品种", systemImage: "cat")
+                .font(.system(size: 13, weight: .medium))
+                .frame(width: 68, alignment: .leading)
+                .accessibilityHidden(true)
+            HStack(spacing: 8) {
+                ForEach(PaperCatBreed.allCases) { breed in
+                    breedButton(breed)
+                }
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("纸片猫品种")
+        }
+    }
+
+    private func breedButton(_ breed: PaperCatBreed) -> some View {
+        let selected = library.settings.paperCatBreed == breed
+        return Button {
+            library.settings.paperCatBreed = breed
+        } label: {
+            HStack(spacing: 6) {
+                CursorDrawing(
+                    settings: ThemeSettings(paperCatStyle: .catOnly, paperCatBreed: breed),
+                    role: .arrow
+                )
+                .frame(width: 28, height: 31)
+                .offset(y: 2)
+                Text(breed.title)
+                    .font(.system(size: 13, weight: selected ? .semibold : .medium))
+                    .lineLimit(1)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(inkAccent)
+                    .opacity(selected ? 1 : 0)
+                    .accessibilityHidden(true)
+            }
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity, minHeight: 36)
+        }
+        .buttonStyle(ThemeSelectionStyle(
+            selected: selected, accent: inkAccent, cornerRadius: 9, border: .primary.opacity(0.13)
+        ))
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("paper-cat-breed-\(breed.rawValue)")
     }
 
     private func colorBinding(_ key: WritableKeyPath<ThemeSettings, RGB>) -> Binding<Color> {
@@ -242,19 +294,20 @@ struct LibraryView: View {
     }
 }
 
-private struct ThemeRowStyle: ButtonStyle {
+private struct ThemeSelectionStyle: ButtonStyle {
     let selected: Bool
     let accent: Color
+    var cornerRadius: CGFloat = 13
+    var border: Color = .clear
 
     func makeBody(configuration: Configuration) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius)
         configuration.label
             .background(
                 accent.opacity(configuration.isPressed ? 0.17 : (selected ? 0.095 : 0)),
-                in: RoundedRectangle(cornerRadius: 13)
+                in: shape
             )
-            .overlay {
-                RoundedRectangle(cornerRadius: 13)
-                    .strokeBorder(accent.opacity(selected ? 0.32 : 0), lineWidth: 1)
-            }
+            .overlay { shape.strokeBorder(selected ? accent.opacity(0.42) : border, lineWidth: 1) }
+            .contentShape(shape)
     }
 }

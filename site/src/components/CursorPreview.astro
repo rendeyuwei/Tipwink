@@ -9,6 +9,7 @@ interface Props {
 
 const { text, base } = Astro.props;
 const assets = `${base}cursors/`;
+const defaultTheme = themeKeys[0];
 ---
 
 <section
@@ -17,6 +18,7 @@ const assets = `${base}cursors/`;
   aria-labelledby="preview-title"
   data-preview
   data-assets={assets}
+  data-default-theme={defaultTheme}
   data-click-idle={text.click}
   data-click-active={text.clicked}
   data-link-idle={text.tryLink}
@@ -32,17 +34,17 @@ const assets = `${base}cursors/`;
 
   <div class="preview-canvas" data-canvas data-scheme="light">
     <div class="sample">
-      <img src={`${assets}pencil-arrow@4x.png`} width="128" height="144" alt="" data-art="arrow" decoding="async" />
+      <img src={`${assets}${defaultTheme}-arrow@4x.png`} width="128" height="144" alt="" data-art="arrow" decoding="async" />
       <span>{text.pointer}</span>
       <button class="sample-button" type="button" data-sample-click aria-pressed="false">{text.click}</button>
     </div>
     <div class="sample">
-      <img src={`${assets}pencil-link@4x.png`} width="128" height="144" alt="" data-art="link" decoding="async" />
+      <img src={`${assets}${defaultTheme}-link@4x.png`} width="128" height="144" alt="" data-art="link" decoding="async" />
       <span>{text.link}</span>
       <a href="#themes" class="sample-link" data-sample-link>{text.tryLink}</a>
     </div>
     <div class="sample">
-      <img src={`${assets}pencil-text@4x.png`} width="128" height="144" alt="" data-art="text" decoding="async" />
+      <img src={`${assets}${defaultTheme}-text@4x.png`} width="128" height="144" alt="" data-art="text" decoding="async" />
       <span>{text.text}</span>
       <span class="sample-text">{text.select}</span>
     </div>
@@ -50,7 +52,7 @@ const assets = `${base}cursors/`;
 
   <div class="preview-themes" role="group" aria-label={text.themeControl}>
     {themeKeys.map((key) => (
-      <button class="preview-theme" type="button" data-theme={key} aria-pressed={key === "pencil" ? "true" : "false"}>
+      <button class="preview-theme" type="button" data-theme={key} aria-pressed={key === defaultTheme ? "true" : "false"}>
         <span class="mini-swatch" data-swatch={key}><img src={`${assets}${key}-arrow.png`} alt="" width="32" height="36" /></span>
         <span>{text.themes[key].name}</span>
       </button>
@@ -83,7 +85,7 @@ const assets = `${base}cursors/`;
       canvas.style.setProperty("--preview-text", `${cursor("text")} 16 18, text`);
     }
 
-    chooseTheme("pencil");
+    chooseTheme(preview.dataset.defaultTheme!);
     for (const button of themes) {
       button.addEventListener("click", () => chooseTheme(button.dataset.theme!));
     }

@@ -178,7 +178,7 @@ struct TipwinkApp: App {
         Window("纸尖", id: "library") {
             LibraryView(library: library)
         }
-        .defaultSize(width: 884, height: 565)
+        .defaultSize(width: 884, height: 600)
         .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(after: .appInfo) {
