@@ -4,7 +4,7 @@
 
 在浅色和深色背景下试用普通指针、链接手形和文字光标，再将喜欢的主题应用到桌面。
 
-**[下载 Mac 版](https://github.com/rendeyuwei/Tipwink/releases/latest/download/Tipwink-macOS-arm64.zip)** · [发行说明](https://github.com/rendeyuwei/Tipwink/releases/latest) · [English](README.md)
+**[下载 Mac 版](https://github.com/rendeyuwei/Tipwink/releases/latest/download/Tipwink-macOS-arm64.zip)** · [产品页](https://rendeyuwei.github.io/Tipwink/zh-cn/) · [发行说明](https://github.com/rendeyuwei/Tipwink/releases/latest) · [English](README.md)
 
 搭载 Apple 芯片的 Mac · macOS 26 或更高版本
 

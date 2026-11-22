@@ -1,0 +1,114 @@
+---
+import "../styles/site.css";
+import CursorPreview from "./CursorPreview.astro";
+import { copy, downloadUrl, releaseUrl, repoUrl, themeKeys, type Locale } from "../copy";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const text = copy[locale];
+const base = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/`;
+const chinese = `${base}zh-cn/`;
+const alternate = locale === "en" ? chinese : base;
+const canonical = new URL(locale === "en" ? base : chinese, Astro.site);
+const image = new URL(`${base}share.png`, Astro.site);
+---
+
+<!doctype html>
+<html lang={text.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={text.description} />
+    <meta name="theme-color" content="#fbf7ef" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={text.title} />
+    <meta property="og:description" content={text.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href={`${base}icon.png`} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={new URL(base, Astro.site)} />
+    <link rel="alternate" hreflang="zh-CN" href={new URL(chinese, Astro.site)} />
+    <link rel="alternate" hreflang="x-default" href={new URL(base, Astro.site)} />
+    <title>{text.title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{text.skip}</a>
+
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href={locale === "en" ? base : chinese}>
+          <img src={`${base}icon.png`} alt="" width="37" height="37" />
+          <span>{text.brand}</span>
+        </a>
+        <nav class="nav">
+          <a href="#themes">{text.themeNav}</a>
+          <a href="#install">{text.installNav}</a>
+          <a href={repoUrl}>GitHub</a>
+          <a class="language" href={alternate} lang={locale === "en" ? "zh-CN" : "en"}>{text.language}</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="wrap hero">
+        <div class="hero-copy">
+          <h1>{text.firstLine}<br /><span>{text.secondLine}</span></h1>
+          <p class="hero-intro">{text.intro}</p>
+          <a class="download-button" href={downloadUrl}>{text.download}</a>
+          <p class="requirements">{text.requirements}</p>
+        </div>
+        <CursorPreview text={text} base={base} />
+      </section>
+
+      <section class="themes-section" id="themes">
+        <div class="wrap themes-inner">
+          <h2 class="section-title">{text.library}</h2>
+          <div class="theme-library">
+            {themeKeys.map((key) => (
+              <a class="library-theme" href="#preview" data-try-theme={key} aria-label={`${text.tryTheme} ${text.themes[key].name}`}>
+                <div class="theme-art" data-swatch={key}>
+                  <img src={`${base}cursors/${key}-arrow@4x.png`} alt="" width="128" height="144" loading="lazy" decoding="async" />
+                </div>
+                <h3>{text.themes[key].name}</h3>
+                <p>{text.themes[key].detail}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="wrap install" id="install">
+        <div class="install-lead">
+          <h2 class="section-title">{text.install}</h2>
+          <p>{text.signing}</p>
+        </div>
+        <div>
+          <ol class="install-steps">
+            {text.steps.map((step) => (
+              <li>
+                <h3>{step.title}</h3>
+                <p>{step.detail}</p>
+              </li>
+            ))}
+          </ol>
+          <p class="update-note">{text.update}</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <span>{text.brand}</span>
+        <div>
+          <a href={releaseUrl}>{text.releaseNotes}</a>
+          <a href={`${repoUrl}/issues`}>{text.feedback}</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

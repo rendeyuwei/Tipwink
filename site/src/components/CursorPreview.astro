@@ -1,0 +1,111 @@
+---
+import type { SiteCopy } from "../copy";
+import { themeKeys } from "../copy";
+
+interface Props {
+  text: SiteCopy;
+  base: string;
+}
+
+const { text, base } = Astro.props;
+const assets = `${base}cursors/`;
+---
+
+<section
+  id="preview"
+  class="preview"
+  aria-labelledby="preview-title"
+  data-preview
+  data-assets={assets}
+  data-click-idle={text.click}
+  data-click-active={text.clicked}
+  data-link-idle={text.tryLink}
+  data-link-active={text.opened}
+>
+  <div class="preview-top">
+    <h2 id="preview-title">{text.preview}</h2>
+    <div class="appearance" role="group" aria-label={text.background}>
+      <button type="button" data-background="light" aria-pressed="true">{text.light}</button>
+      <button type="button" data-background="dark" aria-pressed="false">{text.dark}</button>
+    </div>
+  </div>
+
+  <div class="preview-canvas" data-canvas data-scheme="light">
+    <div class="sample">
+      <img src={`${assets}pencil-arrow@4x.png`} width="128" height="144" alt="" data-art="arrow" decoding="async" />
+      <span>{text.pointer}</span>
+      <button class="sample-button" type="button" data-sample-click aria-pressed="false">{text.click}</button>
+    </div>
+    <div class="sample">
+      <img src={`${assets}pencil-link@4x.png`} width="128" height="144" alt="" data-art="link" decoding="async" />
+      <span>{text.link}</span>
+      <a href="#themes" class="sample-link" data-sample-link>{text.tryLink}</a>
+    </div>
+    <div class="sample">
+      <img src={`${assets}pencil-text@4x.png`} width="128" height="144" alt="" data-art="text" decoding="async" />
+      <span>{text.text}</span>
+      <span class="sample-text">{text.select}</span>
+    </div>
+  </div>
+
+  <div class="preview-themes" role="group" aria-label={text.themeControl}>
+    {themeKeys.map((key) => (
+      <button class="preview-theme" type="button" data-theme={key} aria-pressed={key === "pencil" ? "true" : "false"}>
+        <span class="mini-swatch" data-swatch={key}><img src={`${assets}${key}-arrow.png`} alt="" width="32" height="36" /></span>
+        <span>{text.themes[key].name}</span>
+      </button>
+    ))}
+  </div>
+  <p class="preview-hint"><span class="mouse-hint">{text.mouseHint}</span><span class="touch-hint">{text.touchHint}</span></p>
+</section>
+
+<script>
+  const preview = document.querySelector<HTMLElement>("[data-preview]");
+  if (preview) {
+    const assets = preview.dataset.assets;
+    const canvas = preview.querySelector<HTMLElement>("[data-canvas]")!;
+    const art = preview.querySelectorAll<HTMLImageElement>("[data-art]");
+    const themes = Array.from(preview.querySelectorAll<HTMLButtonElement>("[data-theme]"));
+    const backgrounds = preview.querySelectorAll<HTMLButtonElement>("[data-background]");
+    const click = preview.querySelector<HTMLButtonElement>("[data-sample-click]")!;
+    const link = preview.querySelector<HTMLAnchorElement>("[data-sample-link]")!;
+
+    function chooseTheme(theme: string) {
+      for (const button of themes) {
+        button.setAttribute("aria-pressed", String(button.dataset.theme === theme));
+      }
+      for (const image of art) {
+        image.src = `${assets}${theme}-${image.dataset.art}@4x.png`;
+      }
+      const cursor = (role: string) => `url("${assets}${theme}-${role}.png")`;
+      canvas.style.setProperty("--preview-arrow", `${cursor("arrow")} ${theme === "pencil" ? 5 : 4} 4, default`);
+      canvas.style.setProperty("--preview-link", `${cursor("link")} 12 4, pointer`);
+      canvas.style.setProperty("--preview-text", `${cursor("text")} 16 18, text`);
+    }
+
+    chooseTheme("pencil");
+    for (const button of themes) {
+      button.addEventListener("click", () => chooseTheme(button.dataset.theme!));
+    }
+    for (const button of backgrounds) {
+      button.addEventListener("click", () => {
+        canvas.dataset.scheme = button.dataset.background;
+        for (const option of backgrounds) option.setAttribute("aria-pressed", String(option === button));
+      });
+    }
+    for (const shortcut of document.querySelectorAll<HTMLElement>("[data-try-theme]")) {
+      shortcut.addEventListener("click", () => chooseTheme(shortcut.dataset.tryTheme!));
+    }
+    click.addEventListener("click", () => {
+      const active = click.getAttribute("aria-pressed") === "true";
+      click.setAttribute("aria-pressed", String(!active));
+      click.textContent = (active ? preview.dataset.clickIdle : preview.dataset.clickActive)!;
+    });
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const active = link.dataset.opened === "true";
+      link.dataset.opened = String(!active);
+      link.textContent = (active ? preview.dataset.linkIdle : preview.dataset.linkActive)!;
+    });
+  }
+</script>

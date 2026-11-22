@@ -4,7 +4,7 @@
 
 Try the pointer, link hand, and text cursor on light and dark backgrounds. When you find a theme you like, apply it to your desktop.
 
-**[Download for Mac](https://github.com/rendeyuwei/Tipwink/releases/latest/download/Tipwink-macOS-arm64.zip)** · [Release notes](https://github.com/rendeyuwei/Tipwink/releases/latest) · [简体中文](README.zh-CN.md)
+**[Download for Mac](https://github.com/rendeyuwei/Tipwink/releases/latest/download/Tipwink-macOS-arm64.zip)** · [Website](https://rendeyuwei.github.io/Tipwink/) · [Release notes](https://github.com/rendeyuwei/Tipwink/releases/latest) · [简体中文](README.zh-CN.md)
 
 Apple silicon · macOS 26 or later
 
