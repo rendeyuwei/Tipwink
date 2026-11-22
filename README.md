@@ -1,50 +1,50 @@
 # Tipwink
 
-**A little character for your Mac cursor.**
+**A macOS menu bar app for cursor themes.**
 
-Give your pointer a paper cat, a folded plane, or a look of your own. Try it on light and dark backgrounds and see your changes take effect on the desktop.
+Try the pointer, link hand, and text cursor on light and dark backgrounds. When you find a theme you like, apply it to your desktop.
 
 **[Download for Mac](https://github.com/rendeyuwei/Tipwink/releases)** · [简体中文](README.zh-CN.md)
 
-Apple Silicon · macOS 26 minimum · Pilot build
+Apple silicon · macOS 26 or later · Pilot release
 
-![Paper Plane, Gummy Ghost, and Night Crosshair on light and dark backgrounds](docs/images/cursor-preview.png)
+![Paper Cat, Pixel Jelly, Two-Tone Arrow, and Pencil on light and dark backgrounds](docs/images/cursor-preview.png)
 
-## Find your cursor
+*The preview and theme list show the current development build.* [Pilot release notes](https://github.com/rendeyuwei/Tipwink/releases)
 
-| Theme | What makes it yours |
+## Get started
+
+1. Download and unzip `Tipwink-…-macOS-arm64.zip`. Move `Tipwink.app` to Applications and open it.
+2. Choose a theme. Try clicking, hovering over the sample link, selecting text, and dragging in the preview. The size slider ranges from 75% to 150%.
+3. Choose **应用到桌面** (Apply to Desktop). Once applied, changes to the theme, style, size, and colors take effect as you make them.
+
+The menu bar icon lets you reopen the library, switch themes, and check for updates. Choose **恢复原光标** (Restore Original Cursor) in the library or the menu bar to switch back.
+
+## Themes
+
+| Theme | Description |
 | --- | --- |
-| **Paper Cat** | Click to see it blink. In Cat Only mode, the ear points and a paw comes up over links. |
-| **Pixel Jelly** | Chunky pixels in grape and mint. |
-| **Two-Tone Arrow** | Pick your own fill and outline colors. |
-| **Paper Plane** | A folded paper pointer with its nose at the click point. |
-| **Gummy Ghost** | A soft lilac ghost that raises a hand over links. |
-| **Night Crosshair** | Mint marks around a clear center point for precise clicks. |
+| **Paper Cat** | A cat that blinks when you click. Cat Only mode (纯猫) uses the tip of an ear for pointing and a raised paw for links. |
+| **Pixel Jelly** | Pixel-art cursors in purple with mint accents. |
+| **Two-Tone Arrow** | A classic cursor set with independent fill and outline colors. |
+| **Pencil** | A short amber pencil with the click point at its tip. |
 
-## Try it on your Mac
+## Compatibility
 
-1. Download the `Tipwink-…-macOS-arm64.zip` asset from the release page, then unzip and open **Tipwink** (纸尖).
-2. Choose a theme and preview its pointer, link, and text cursors. You can test clicks, links, text selection, and dragging, and set the size from 75% to 150%.
-3. Choose **Apply to Desktop** (应用到桌面). Theme, style, size, and color changes apply as you make them. Use **Restore Original Cursor** (恢复原光标) in the window or menu bar to switch back.
+Desktop themes apply to the macOS system cursors. Apps and system views can display cursors of their own.
 
-Use the cursor icon in the menu bar to reopen the theme library, switch themes, check for updates, or quit Tipwink.
+Custom macOS pointer colors can override a theme. If Tipwink shows **重设后应用…** (Apply After Reset), choose it, select **Reset Colors** under **Pointer** in Display settings, and return to Tipwink to apply the selected theme. [Apple’s pointer settings guide](https://support.apple.com/guide/mac-help/mchlp2920/mac)
 
-Desktop theming was tested on macOS 26.6.2. Native app checks also passed on macOS 26.7.2, 27.0.1, and 27.2. Apps that draw their own cursors and some system screens may show a different pointer. [Test results for 26.7.2 and 27.0.1](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) · [Test results for 27.2](https://github.com/rendeyuwei/Tipwink/actions/runs/43893555334/job/133390880912)
+Pilot downloads are signed with an Apple Development certificate.
 
-Custom macOS pointer colors can override desktop themes. Choose **Apply After Reset…** (重设后应用…) to open **System Settings → Accessibility → Display**. In the **Pointer** section, choose **Reset Colors**. Tipwink applies the selected theme when you return. You can keep your pointer size. [Apple's pointer settings guide](https://support.apple.com/guide/mac-help/make-the-pointer-easier-to-see-mchlp2920/mac)
+## Feedback
 
-The pilot ZIP uses Apple Development signing. Public distribution requires a Developer ID signed and notarized build.
+For cursor issues, include your macOS version, Tipwink version, selected theme, and the app or screen where the issue appears. [Report an issue or suggest an improvement](https://github.com/rendeyuwei/Tipwink/issues)
 
-## Build and publish
+## Build from source
 
-Open [Tipwink.xcodeproj](Tipwink.xcodeproj) in Xcode 26 or later and run the **Tipwink** scheme.
+Open `Tipwink.xcodeproj` in Xcode 26 or later. Select the **Tipwink** scheme and **My Mac**, then run the app. [Xcode project](Tipwink.xcodeproj) · [Release and update guide](docs/updates.md)
 
-On the configured release Mac, increment the version and build number, commit and push the changes, then run the release script from the checkout root.
+## Credits
 
-```sh
-./scripts/release-pilot
-```
-
-The script builds and signs one ZIP, publishes it to GitHub Releases with a download link, and verifies that OSS serves the same file. It updates the in-app feed after both downloads pass verification. [Release guide](docs/updates.md)
-
-Tipwink's cursor artwork is drawn in the project. Its theme library and interactive preview took inspiration from [MaCursor](https://writronic.com/macursor/) and [CursorMagic](https://pocketgiant.co/software/cursormagic/).
+Tipwink draws its cursor artwork in code. MaCursor and CursorMagic inspired the theme library and interactive preview. [MaCursor](https://writronic.com/macursor/) · [CursorMagic](https://pocketgiant.co/software/cursormagic/)

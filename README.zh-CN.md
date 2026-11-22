@@ -1,50 +1,50 @@
 # 纸尖 · Tipwink
 
-**给 Mac 换个有趣的光标。**
+**一款常驻菜单栏的 macOS 光标主题应用。**
 
-让纸片猫陪你点击，换一架用机鼻指向的纸飞机，或者搭一套自己的双色指针。在浅色和深色背景里试一试，喜欢的样式可以实时用到桌面。
+在浅色和深色背景下试用普通指针、链接手形和文字光标，再将喜欢的主题应用到桌面。
 
 **[下载 Mac 内测版](https://github.com/rendeyuwei/Tipwink/releases)** · [English](README.md)
 
-Apple 芯片 Mac · 最低安装版本 macOS 26
+搭载 Apple 芯片的 Mac · macOS 26 或更高版本
 
-![纸飞机、软糖幽灵和夜光准星的浅色与深色预览](docs/images/cursor-preview.png)
+![纸片猫、像素果冻、双色箭头和铅笔的浅色与深色预览](docs/images/cursor-preview.png)
 
-## 六套光标主题
-
-| 主题 | 特色 |
-| --- | --- |
-| **纸片猫** | 点一下会眨眼。纯猫模式用耳尖指向，移到链接上会抬爪。 |
-| **像素果冻** | 葡萄紫和薄荷绿的像素光标。 |
-| **双色箭头** | 填充和描边可以分别选色。 |
-| **纸飞机** | 用折纸机鼻对准点击位置。 |
-| **软糖幽灵** | 圆润的淡紫小幽灵，移到链接上会抬手。 |
-| **夜光准星** | 薄荷色刻线围出清晰的中心点，方便精确对位。 |
+*预览和主题表展示当前开发版。* [内测发布说明](https://github.com/rendeyuwei/Tipwink/releases)
 
 ## 开始使用
 
-1. 在 Release 页面下载 `Tipwink-…-macOS-arm64.zip`，解压后打开「纸尖」。
-2. 选一套主题，预览指向、链接和文字三种光标。试用区可以点击按钮和链接、选字和拖动，大小可调到 75% 至 150%。
-3. 点击「应用到桌面」。主题、样式、大小和配色会即时生效。要切回去，在窗口或菜单栏点「恢复原光标」。
+1. 下载并解压 `Tipwink-…-macOS-arm64.zip`，将 `Tipwink.app` 移到「应用程序」，然后打开。
+2. 选一套主题，在试用区试点按钮、预览链接手形、选字或拖动。光标大小可在 75% 至 150% 之间调整。
+3. 点击「应用到桌面」。应用后，调整主题、样式、大小和配色会即时生效。
 
-点击菜单栏的光标图标，可以重新打开主题库、切换主题、检查更新或退出纸尖。
+点击菜单栏的光标图标，可以重新打开主题库、切换主题或检查更新。要换回原光标，在主题库窗口或菜单栏选择「恢复原光标」。
 
-桌面换肤已在 macOS 26.6.2 实测。指向、链接和文字三种光标也通过了 macOS 26.7.2、27.0.1 和 27.2 的原生应用测试。自行绘制指针的应用和部分系统界面可能显示不同的光标。[26.7.2 和 27.0.1 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43892657673) · [27.2 测试结果](https://github.com/rendeyuwei/Tipwink/actions/runs/43893555334/job/133390880912)
+## 光标主题
 
-macOS 自定义指针颜色会覆盖桌面主题。在纸尖点「重设后应用…」会打开「系统设置 → 辅助功能 → 显示」。在「指针」中点「重设颜色」，回到纸尖时就会应用选中的主题。指针大小可以保留。[Apple 指针设置说明](https://support.apple.com/zh-cn/guide/mac-help/make-the-pointer-easier-to-see-mchlp2920/mac)
+| 主题 | 样式 |
+| --- | --- |
+| **纸片猫** | 点击时眨眼。切到「纯猫」后，用耳尖定位，指向链接时抬爪。 |
+| **像素果冻** | 葡萄紫的像素光标，配薄荷绿点缀。 |
+| **双色箭头** | 经典指针造型，可分别调整填充色和描边色。 |
+| **铅笔** | 琥珀色短铅笔，点击落点在笔尖。 |
 
-内测安装包使用 Apple Development 签名。公开分发前需要 Developer ID 签名和 Apple 公证。
+## 兼容性
 
-## 构建与发版
+桌面主题作用于 macOS 的系统光标。部分应用和系统界面会显示自己的光标。
 
-用 Xcode 26 或更新版本打开 [Tipwink.xcodeproj](Tipwink.xcodeproj)，运行 **Tipwink** scheme。
+macOS 自定义指针颜色会覆盖桌面主题。如果纸尖显示「重设后应用…」，点开后在「显示」设置的「指针」一栏选择「重设颜色」，再返回纸尖即可应用选中的主题。[Apple 指针设置指南](https://support.apple.com/zh-cn/guide/mac-help/mchlp2920/mac)
 
-在已配置的发版 Mac 上递增版本号和构建号，提交并推送后，从仓库根目录运行发版脚本。
+内测安装包使用 Apple Development 证书签名。
 
-```sh
-./scripts/release-pilot
-```
+## 问题与反馈
 
-脚本会构建并签名同一份 ZIP，把它传到 OSS 和 GitHub Release，并在 Release 里放好下载链接。两边的下载验证通过后，才会更新 App 里的版本清单。[发布指南](docs/updates.md)
+如果遇到光标问题，请附上 macOS 版本、纸尖版本、选中的主题，以及问题出现的应用或界面。[提交问题或建议](https://github.com/rendeyuwei/Tipwink/issues)
 
-所有光标图形均在本工程内绘制。主题库和试用区参考了 [MaCursor](https://writronic.com/macursor/) 和 [CursorMagic](https://pocketgiant.co/software/cursormagic/)。
+## 从源码构建
+
+用 Xcode 26 或更新版本打开 `Tipwink.xcodeproj`，选择 **Tipwink** 方案和 **My Mac**，然后运行。[Xcode 工程](Tipwink.xcodeproj) · [发布与更新指南](docs/updates.md)
+
+## 致谢
+
+纸尖的光标由代码绘制。主题库和试用区参考了 MaCursor 和 CursorMagic。[MaCursor](https://writronic.com/macursor/) · [CursorMagic](https://pocketgiant.co/software/cursormagic/)
