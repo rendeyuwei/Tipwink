@@ -4,3 +4,9 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 .tipwink-pilot.json
+.tipwink-public.json
+*.p12
+*.p8
+*.mobileprovision
+*.provisionprofile
+__pycache__/

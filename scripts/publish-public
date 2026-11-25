@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+"""Promote an already signed and tested Tipwink release on the designated Mac."""
+
+import argparse
+import fcntl
+import hashlib
+import json
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[1]
+REPO = "rendeyuwei/Tipwink"
+NS = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
+TESTS = ("discovery", "download", "install", "relaunch", "settings_preserved")
+
+
+def require(value, message):
+    if not value:
+        raise ValueError(message)
+
+
+def run(label, *args):
+    result = subprocess.run(
+        list(map(str, args)), cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        check=False, timeout=180,
+    )
+    require(result.returncode == 0, f"{label} failed (exit {result.returncode}).")
+    return result.stdout.strip()
+
+
+def digest(path):
+    with path.open("rb") as f:
+        sha = hashlib.sha256()
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            sha.update(chunk)
+        return sha.hexdigest()
+
+
+def version_tuple(value):
+    require(isinstance(value, str) and re.fullmatch(r"\d+\.\d+\.\d+", value), "Invalid version.")
+    return tuple(map(int, value.split(".")))
+
+
+def cast_version(path):
+    items = ET.parse(path).getroot().findall("./channel/item")
+    require(len(items) == 1, "The public feed must contain exactly one release.")
+    item = items[0]
+    enclosure = item.find("enclosure")
+    require(enclosure is not None, "Feed enclosure missing.")
+    version = item.findtext(NS + "shortVersionString") or enclosure.get(NS + "shortVersionString")
+    build = item.findtext(NS + "version") or enclosure.get(NS + "version")
+    version_tuple(version)
+    require(isinstance(build, str) and re.fullmatch(r"[1-9]\d*", build), "Invalid build.")
+    return version, int(build)
+
+
+def fetch(url, path):
+    return run("Public HTTPS readback", "curl", "--disable", "--silent", "--show-error", "--proto", "=https",
+               "--connect-timeout", "10", "--max-time", "120", "--header", "Cache-Control: no-cache",
+               "--max-filesize", "200000000", "--output", path, "--write-out", "%{http_code}", "--", url)
+
+
+def oss_put(cfg, path, media, cache, *, immutable=False):
+    command = ["aliyun", "ossutil", "api", "put-object", "--profile", cfg["profile"],
+               "--region", cfg["region"], "--endpoint", cfg["endpoint"], "--bucket", cfg["bucket"],
+               "--key", f"{cfg['prefix']}/{path.name}", "--body", f"file://{path}",
+               "--content-type", media, "--cache-control", cache, "--retry-times", "1"]
+    if immutable:
+        command.append("--forbid-overwrite")
+    run("OSS object upload", *command)
+
+
+def gh(*args):
+    return run("GitHub release step", "gh", *args)
+
+
+def remote_release(tag):
+    raw = gh("api", "--hostname", "github.com", f"repos/{REPO}/releases", "--paginate", "--slurp")
+    rows = [row for page in json.loads(raw) for row in page if row.get("tag_name") == tag]
+    require(len(rows) <= 1, "Duplicate GitHub release.")
+    return rows[0] if rows else None
+
+
+def tag_sha(tag):
+    return gh("api", "--hostname", "github.com", f"repos/{REPO}/commits/{tag}", "--jq", ".sha")
+
+
+def valid_receipt(receipt, sha, version, build, previous, main):
+    require(receipt.get("zip_sha256") == sha and receipt.get("source_commit") == main
+            and receipt.get("version") == version and receipt.get("build") == build,
+            "Upgrade evidence does not match this ZIP, version, build and commit.")
+    previous_valid = (
+        receipt.get("from_version") == previous[0] and receipt.get("from_build") == previous[1]
+        if previous else type(receipt.get("from_build")) is int and 0 < receipt["from_build"] < build
+    )
+    require(previous_valid, "Upgrade evidence lacks the expected baseline.")
+    require(all(receipt.get(test) is True for test in TESTS)
+            and isinstance(receipt.get("evidence"), str) and receipt["evidence"].strip(),
+            "Complete all native upgrade checks and record evidence first.")
+
+
+def promote(args, tmp):
+    cfg = json.loads(args.config.read_text())
+    require(isinstance(cfg, dict), "Invalid public release config.")
+    for key in ("bucket", "region", "endpoint", "prefix", "profile", "team", "sparkle_bin",
+                "keychain_account"):
+        require(isinstance(cfg.get(key), str) and cfg[key], f"Missing config field: {key}.")
+    require(cfg["endpoint"] == f"oss-{cfg['region']}.aliyuncs.com"
+            and re.fullmatch(r"[a-z0-9-]+", cfg["region"])
+            and re.fullmatch(r"[a-z0-9][a-z0-9-]{1,61}[a-z0-9]", cfg["bucket"])
+            and re.fullmatch(r"public/[a-zA-Z0-9_-]+", cfg["prefix"])
+            and cfg["keychain_account"] not in ("tipwink", "ed25519"),
+            "Require a dedicated formal OSS path and Sparkle Keychain account.")
+    base = f"https://{cfg['bucket']}.{cfg['endpoint']}/{cfg['prefix']}"
+    feed_url = base + "/appcast.xml"
+    zip_path, cast_path = tmp / "Tipwink-macOS-arm64.zip", tmp / "appcast.xml"
+    shutil.copyfile(args.zip, zip_path)
+    shutil.copyfile(args.appcast, cast_path)
+    sha = digest(zip_path)
+    version, build = cast_version(cast_path)
+    require(version == args.version and build == args.build, "Unexpected staged release version/build.")
+    tag = f"v{version}"
+    git_main = gh("api", "--hostname", "github.com", f"repos/{REPO}/commits/main", "--jq", ".sha")
+    require(args.commit == git_main and re.fullmatch(r"[0-9a-f]{40}", git_main),
+            "Candidate must match current GitHub main.")
+    gate = [ROOT / "scripts/release-public", "verify", "--zip", zip_path, "--appcast", cast_path,
+            "--feed-url", feed_url, "--team", cfg["team"], "--sparkle-bin", cfg["sparkle_bin"],
+            "--keychain-account", cfg["keychain_account"]]
+    run("Final signed package and appcast preflight", *gate)
+
+    old_feed = tmp / "current.xml"
+    old_status = fetch(feed_url, old_feed)
+    already = old_status == "200" and digest(old_feed) == digest(cast_path)
+    receipt = json.loads(args.receipt.read_text())
+    prior = None
+    if old_status == "200" and not already:
+        tools = Path(cfg["sparkle_bin"]).expanduser().resolve()
+        run("Existing public feed signature", tools / "sign_update", "--verify", "--account",
+            cfg["keychain_account"], old_feed)
+        prior = cast_version(old_feed)
+        require(version_tuple(version) > version_tuple(prior[0]) and build > prior[1],
+                "The public feed would move backward or replace the same version.")
+    elif not already:
+        require(args.bootstrap and old_status in ("403", "404"),
+                "Could not read existing feed. Stop instead of assuming a new channel.")
+    if not already:
+        require((prior is None) == args.bootstrap, "Bootstrap requires an unused public feed.")
+    valid_receipt(receipt, sha, version, build, prior, git_main)
+
+    remote_zip = tmp / "oss-readback.zip"
+    oss_name = f"Tipwink-{version}-macOS-arm64.zip"
+    oss_url = f"{base}/{oss_name}"
+    status = fetch(oss_url, remote_zip)
+    if status in ("403", "404") and not already:
+        named = tmp / oss_name
+        shutil.copyfile(zip_path, named)
+        oss_put(cfg, named, "application/zip", "public,max-age=31536000,immutable", immutable=True)
+        status = fetch(oss_url, remote_zip)
+    require(status == "200" and digest(remote_zip) == sha, "Public OSS ZIP missing or differs; do not overwrite.")
+
+    release = remote_release(tag)
+    if release is None:
+        gh("release", "create", tag, "--repo", REPO, "--draft", "--target", git_main,
+           "--title", f"Tipwink {version}", "--notes-file", args.notes)
+        release = remote_release(tag)
+    require(release and release["prerelease"] is False, "Expected a formal GitHub release.")
+    if release["draft"]:
+        require(release["target_commitish"] == git_main, "Draft points at another commit.")
+    else:
+        require(tag_sha(tag) == git_main, "Existing tag points at another commit.")
+    assets = [a for a in release["assets"] if a.get("name") == zip_path.name]
+    require(len(assets) <= 1, "Unexpected duplicate GitHub ZIP.")
+    if not assets and release["draft"]:
+        gh("release", "upload", tag, zip_path, "--repo", REPO)
+    gh_copy = tmp / "github"
+    gh_copy.mkdir()
+    gh("release", "download", tag, "--repo", REPO, "--pattern", zip_path.name, "--dir", gh_copy)
+    require(digest(gh_copy / zip_path.name) == sha, "GitHub ZIP differs; do not overwrite.")
+    if release["draft"]:
+        gh("release", "edit", tag, "--draft=false", "--latest", "--repo", REPO)
+    require(tag_sha(tag) == git_main, "Published GitHub tag points at another commit.")
+    published = remote_release(tag)
+    require(published and published["draft"] is False and published["prerelease"] is False,
+            "GitHub release is not public.")
+
+    latest_zip = tmp / "github-latest.zip"
+    latest_zip_url = f"https://github.com/{REPO}/releases/latest/download/{zip_path.name}"
+    code = run("GitHub latest public download", "curl", "--disable", "--silent", "--show-error",
+               "--location", "--max-redirs", "3", "--proto", "=https", "--proto-redir", "=https",
+               "--connect-timeout", "10", "--max-time", "120", "--max-filesize", "200000000",
+               "--output", latest_zip, "--write-out", "%{http_code}", "--", latest_zip_url)
+    require(code == "200" and digest(latest_zip) == sha,
+            "GitHub latest download is not the signed candidate. Do not advance the feed.")
+    # Recheck the remote pointer just before advancing it. Only the designated Mac may write it.
+    latest = tmp / "fresh.xml"
+    fresh_status = fetch(feed_url, latest)
+    require(fresh_status == old_status and (old_status != "200" or digest(old_feed) == digest(latest)),
+            "Public feed changed concurrently. Do not advance it.")
+    if not already:
+        oss_put(cfg, cast_path, "application/xml", "no-cache,max-age=0,must-revalidate",
+                immutable=args.bootstrap)
+    gate[1] = "verify-live"
+    run("Public GitHub, feed and OSS readback", *gate)
+    print(f"Public artifacts verified: Tipwink {version} ({build}), SHA-256 {sha}", flush=True)
+    print("Complete the post-publication native smoke check before marking the release done.", flush=True)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    for option in ("config", "zip", "appcast", "notes", "receipt"):
+        ap.add_argument(f"--{option}", type=Path, required=True)
+    ap.add_argument("--version", required=True)
+    ap.add_argument("--build", type=int, required=True)
+    ap.add_argument("--commit", required=True)
+    ap.add_argument("--bootstrap", action="store_true")
+    ap.add_argument("--publish", action="store_true", help="Required to perform remote writes")
+    args = ap.parse_args()
+    try:
+        require(sys.platform == "darwin", "Public promotion runs only on the designated Mac.")
+        require(args.publish, "Pass --publish only after completing the release review.")
+        state = ROOT / ".build" / "tipwink-public"
+        state.mkdir(parents=True, exist_ok=True)
+        with (state / "publish.lock").open("a") as lock, tempfile.TemporaryDirectory() as tmp:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            promote(args, Path(tmp))
+        return 0
+    except (ValueError, OSError, KeyError, TypeError, AttributeError, ET.ParseError, subprocess.SubprocessError) as exc:
+        if type(exc) is ValueError:
+            print(f"Release incomplete: {exc}", file=sys.stderr)
+        else:
+            print(f"Release incomplete: input or environment error ({type(exc).__name__}).", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
