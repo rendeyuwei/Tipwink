@@ -43,3 +43,7 @@ Users on builds that predate Sparkle, such as 0.4.0, quit the old app and replac
 4. Upload the new ZIP first and the generated `appcast.xml` last. Editing the feed after generation invalidates its signature. Test **Check for Updates…** and the install flow from the previous distribution build.
 
 For details on signed feeds and publishing, see the [Sparkle publishing guide](https://sparkle-project.org/documentation/publishing/).
+
+## Public releases
+
+Use the [public release runbook](public-release.md) and its repository gates for Developer ID distribution. The pilot script is not a public-release command.

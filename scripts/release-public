@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+"""Fail-closed, read-only gate for a signed Tipwink update."""
+import argparse
+import base64
+import binascii
+import hashlib
+import json
+from pathlib import Path
+import plistlib
+import re
+import subprocess
+import sys
+import tempfile
+from urllib.parse import urlsplit
+import xml.etree.ElementTree as ET
+import zipfile
+
+BUNDLE = "studio.papercursor.macos"
+REPO = "https://github.com/rendeyuwei/Tipwink"
+SPARKLE = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
+VERSION = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)")
+BUILD = re.compile(r"[1-9][0-9]*")
+
+
+class GateError(Exception):
+    pass
+
+
+def need(ok, message):
+    if not ok:
+        raise GateError(message)
+
+
+def b64(value, size):
+    try:
+        return isinstance(value, str) and len(base64.b64decode(value, validate=True)) == size
+    except (ValueError, binascii.Error):
+        return False
+
+
+def run(label, *args):
+    # Never echo arguments, stdout, stderr or signing-tool diagnostics on failure.
+    try:
+        result = subprocess.run([str(x) for x in args], capture_output=True, text=True,
+                                timeout=180, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        raise GateError(f"{label} unavailable or timed out.") from None
+    need(result.returncode == 0, f"{label} failed (exit {result.returncode}).")
+    return result.stdout.strip()
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def feed_base(url):
+    parsed = urlsplit(url)
+    need(parsed.scheme == "https" and parsed.hostname not in (None, "localhost")
+         and parsed.username is None and parsed.password is None
+         and not parsed.query and not parsed.fragment and parsed.port in (None, 443)
+         and re.fullmatch(r"/(?:[a-zA-Z0-9_-]+/)*appcast\.xml", parsed.path)
+         and not any(x.casefold() in ("pilot", "staging", "test") for x in parsed.path.split("/")),
+         "Expected the stable HTTPS production appcast URL, not a pilot or staging path.")
+    return url.rsplit("/", 1)[0]
+
+
+def numbers(version, build):
+    need(isinstance(version, str) and VERSION.fullmatch(version)
+         and BUILD.fullmatch(str(build)), "Expected three-part marketing version and positive build number.")
+    return tuple(map(int, version.split("."))), int(build)
+
+
+def plist_from_zip(archive):
+    with zipfile.ZipFile(archive) as zipped:
+        key = "Tipwink.app/Contents/Info.plist"
+        paths = zipped.namelist()
+        need(paths.count(key) == 1, "ZIP must contain one Tipwink.app Info.plist.")
+        need(all(
+            (name.startswith("Tipwink.app/") or name.startswith("__MACOSX/"))
+            and ".." not in name.split("/") and "\\" not in name
+            for name in paths
+        ), "ZIP has unexpected paths.")
+        return plistlib.loads(zipped.read(key))
+
+
+def validate_package(info, feed_url, public_key):
+    need(info.get("CFBundleIdentifier") == BUNDLE, "Unexpected bundle identifier.")
+    need(info.get("SUFeedURL") == feed_url, "Final ZIP is missing the expected production SUFeedURL.")
+    need(b64(public_key, 32) and info.get("SUPublicEDKey") == public_key,
+         "Final ZIP is missing the expected Sparkle public key.")
+    need(info.get("SURequireSignedFeed") is True and info.get("SUVerifyUpdateBeforeExtraction") is True,
+         "Final ZIP must require a signed feed and verify the update before extraction.")
+    version, build = info.get("CFBundleShortVersionString"), info.get("CFBundleVersion")
+    numbers(version, build)
+    minimum = info.get("LSMinimumSystemVersion")
+    need(isinstance(minimum, str) and re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,2}", minimum),
+         "Final ZIP has no valid minimum macOS version.")
+    return version, str(build), minimum
+
+
+def normalized_os(value):
+    if not value or not re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,2}", value):
+        return None
+    parts = tuple(map(int, value.split(".")))
+    return parts + (0,) * (3 - len(parts))
+
+
+def check_appcast(path, version, build, minimum, base, length):
+    xml = path.read_bytes()
+    need(len(xml) < 2_000_000 and b"<!" + b"DOCTYPE" not in xml.upper()
+         and b"<!" + b"ENTITY" not in xml.upper(), "Appcast XML exceeds limits or declares entities.")
+    root = ET.fromstring(xml)
+    channels = root.findall("channel")
+    need(root.tag == "rss" and len(channels) == 1, "Expected one RSS channel.")
+    items = channels[0].findall("item")
+    need(len(items) == 1, "Expected one full public update item.")
+    item = items[0]
+    enclosures = item.findall("enclosure")
+    need(len(enclosures) == 1, "Expected one update enclosure.")
+    enc = enclosures[0]
+    need(item.findtext(SPARKLE + "shortVersionString") == version
+         and item.findtext(SPARKLE + "version") == build,
+         "Appcast version/build does not match ZIP.")
+    need(normalized_os(item.findtext(SPARKLE + "minimumSystemVersion")) == normalized_os(minimum),
+         "Appcast minimum system does not match ZIP.")
+    need(item.findtext(SPARKLE + "hardwareRequirements") in (None, "arm64"),
+         "Appcast hardware requirements do not match arm64 ZIP.")
+    need(all(item.find(SPARKLE + key) is None for key in
+             ("channel", "deltas", "informationalUpdate", "phasedRolloutInterval",
+              "maximumSystemVersion", "minimumUpdateVersion", "releaseNotesLink")),
+         "Appcast has update eligibility rules, external notes or deltas not allowed by this full-update gate.")
+    asset_url = f"{base}/Tipwink-{version}-macOS-arm64.zip"
+    need(enc.get("url") == asset_url and enc.get("length") == str(length),
+         "Appcast enclosure must point to the expected immutable versioned ZIP with exact size.")
+    signature = enc.get(SPARKLE + "edSignature")
+    need(b64(signature, 64), "Appcast enclosure has no valid Ed25519 signature field.")
+    return asset_url, signature
+
+
+def check_macos(archive, team, temp):
+    app = temp / "Tipwink.app"
+    run("macOS ZIP extraction", "/usr/bin/ditto", "-x", "-k", archive, temp)
+    need(app.is_dir() and not app.is_symlink(), "ZIP did not extract an ordinary Tipwink.app bundle.")
+    run("App code signature", "/usr/bin/codesign", "--verify", "--deep", "--strict", app)
+    details = subprocess.run(["/usr/bin/codesign", "-dv", "--verbose=4", str(app)],
+                             capture_output=True, text=True, timeout=30, check=False)
+    lines = details.stderr.splitlines()
+    need(details.returncode == 0 and f"TeamIdentifier={team}" in lines
+         and any(line.startswith("Authority=Developer ID Application:") for line in lines),
+         "Release was not signed with the expected Developer ID team.")
+    run("Stapled Apple notarization", "/usr/bin/xcrun", "stapler", "validate", app)
+    run("Gatekeeper assessment", "/usr/sbin/spctl", "--assess", "--type", "execute", app)
+    executable = app / "Contents/MacOS/Tipwink"
+    need(run("Architecture check", "/usr/bin/lipo", "-archs", executable) == "arm64",
+         "Release archive must contain an arm64 Tipwink executable.")
+
+
+def download(url, dest, *, redirects=False):
+    redirect = ("--location", "--max-redirs", "3", "--proto-redir", "=https") if redirects else ()
+    status = run("Public HTTPS readback", "curl", "--disable", "--silent", "--show-error",
+                 "--proto", "=https", "--connect-timeout", "10", "--max-time", "90",
+                 "--max-filesize", "200000000", "--output", dest, "--write-out", "%{http_code}",
+                 *redirect, url)
+    need(status == "200", "Public HTTPS readback did not return HTTP 200.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("verify", "verify-live"))
+    parser.add_argument("--zip", type=Path, required=True)
+    parser.add_argument("--appcast", type=Path, required=True)
+    parser.add_argument("--feed-url", required=True)
+    parser.add_argument("--team", required=True)
+    parser.add_argument("--sparkle-bin", type=Path, required=True)
+    parser.add_argument("--keychain-account", required=True)
+    parser.add_argument("--github-url", help="Optional explicit GitHub release ZIP URL; versioned URL is derived if omitted.")
+    parser.add_argument("--previous-zip", type=Path, help="Previously shipped updatable ZIP for source/key/build continuity.")
+    args = parser.parse_args()
+    try:
+        need(sys.platform == "darwin", "Full release gate must run on the release Mac.")
+        need(re.fullmatch(r"[A-Z0-9]{10}", args.team), "Invalid Developer ID team.")
+        need(re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", args.keychain_account)
+             and args.keychain_account not in ("tipwink", "ed25519"),
+             "Use the dedicated production Sparkle account, never the pilot or global account.")
+        base = feed_base(args.feed_url)
+        tools = args.sparkle_bin.resolve()
+        public_key = run("Sparkle public key lookup", tools / "generate_keys", "--account",
+                         args.keychain_account, "-p")
+        version, build, minimum = validate_package(plist_from_zip(args.zip), args.feed_url, public_key)
+        if args.previous_zip:
+            prev_version, prev_build, _ = validate_package(
+                plist_from_zip(args.previous_zip), args.feed_url, public_key)
+            v, b = numbers(version, build)
+            pv, pb = numbers(prev_version, prev_build)
+            need(v > pv and b > pb, "Marketing version and build must both increase over previous release.")
+        need(args.zip.name in ("Tipwink-macOS-arm64.zip", f"Tipwink-{version}-macOS-arm64.zip"),
+             "Unexpected release ZIP filename.")
+        oss_url, signature = check_appcast(args.appcast, version, build, minimum, base, args.zip.stat().st_size)
+        run("Sparkle appcast signature", tools / "sign_update", "--verify", "--account",
+            args.keychain_account, args.appcast)
+        run("Sparkle archive signature", tools / "sign_update", "--verify", "--account",
+            args.keychain_account, args.zip, signature)
+        digest = sha(args.zip)
+        with tempfile.TemporaryDirectory(prefix="tipwink-public-") as work:
+            temp = Path(work)
+            check_macos(args.zip, args.team, temp)
+            if args.command == "verify-live":
+                github_url = args.github_url or f"{REPO}/releases/download/v{version}/Tipwink-macOS-arm64.zip"
+                need(github_url == f"{REPO}/releases/download/v{version}/Tipwink-macOS-arm64.zip",
+                     "GitHub asset URL does not identify the exact Tipwink release.")
+                download(args.feed_url, temp / "feed.xml")
+                need((temp / "feed.xml").read_bytes() == args.appcast.read_bytes(),
+                     "Public appcast is not the signed candidate.")
+                download(oss_url, temp / "oss.zip")
+                download(github_url, temp / "github.zip", redirects=True)
+                need(sha(temp / "oss.zip") == digest == sha(temp / "github.zip"),
+                     "OSS or GitHub ZIP differs from the signed candidate.")
+        print(json.dumps({"status": args.command, "version": version, "build": int(build),
+                          "zip_sha256": digest, "appcast_sha256": sha(args.appcast)}))
+        return 0
+    except (GateError, OSError, ET.ParseError, plistlib.InvalidFileException, ValueError,
+            zipfile.BadZipFile, subprocess.SubprocessError) as exc:
+        print(f"Release blocked: {exc}" if isinstance(exc, GateError)
+              else "Release blocked: cannot read or validate release artifacts.", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
