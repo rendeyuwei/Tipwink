@@ -15,6 +15,9 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = "rendeyuwei/Tipwink"
+PUBLIC_BUCKET = "tipwink-updates-6ee43e7763"
+PUBLIC_REGION = "cn-hongkong"
+PUBLIC_PREFIX = "public/stable"
 NS = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
 TESTS = ("discovery", "download", "install", "relaunch", "settings_preserved")
 
@@ -111,9 +114,7 @@ def promote(args, tmp):
                 "keychain_account"):
         require(isinstance(cfg.get(key), str) and cfg[key], f"Missing config field: {key}.")
     require(cfg["endpoint"] == f"oss-{cfg['region']}.aliyuncs.com"
-            and re.fullmatch(r"[a-z0-9-]+", cfg["region"])
-            and re.fullmatch(r"[a-z0-9][a-z0-9-]{1,61}[a-z0-9]", cfg["bucket"])
-            and re.fullmatch(r"public/[a-zA-Z0-9_-]+", cfg["prefix"])
+            and (cfg["bucket"], cfg["region"], cfg["prefix"]) == (PUBLIC_BUCKET, PUBLIC_REGION, PUBLIC_PREFIX)
             and cfg["keychain_account"] not in ("tipwink", "ed25519"),
             "Require a dedicated formal OSS path and Sparkle Keychain account.")
     base = f"https://{cfg['bucket']}.{cfg['endpoint']}/{cfg['prefix']}"
