@@ -1,0 +1,21 @@
+#!/bin/bash
+# Run before opening a public release archive in Organizer or calling -exportArchive.
+set -euo pipefail
+archive=${1:-}
+team=${2:-}
+die() { printf 'Release blocked: %s\n' "$1" >&2; exit 1; }
+[[ $# == 2 && "$archive" == *.xcarchive && "$team" =~ ^[A-Z0-9]{10}$ ]] ||
+  die "Usage: scripts/verify-release-archive PATH.xcarchive EXPECTED_TEAM"
+plist="$archive/Info.plist"
+app="$archive/Products/Applications/Tipwink.app"
+[[ -d "$app" && -f "$plist" ]] || die "The archive has no Tipwink app."
+actual=$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:Team' "$plist" 2>/dev/null) ||
+  die "Archive has no signing team. Rebuild with Apple Development and the configured team."
+[[ "$actual" == "$team" ]] || die "Archive signing team does not match the release configuration."
+/usr/bin/codesign --verify --deep --strict "$app" 2>/dev/null ||
+  die "The archived app failed signature verification."
+details=$(/usr/bin/codesign -dv --verbose=4 "$app" 2>&1) ||
+  die "Could not inspect the archived app signature."
+grep -Fxq "TeamIdentifier=$team" <<< "$details" ||
+  die "The archived app does not have the expected signing team."
+printf 'Archive team and signature verified. Developer ID export and notarization still required.\n'

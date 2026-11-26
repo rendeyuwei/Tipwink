@@ -20,7 +20,7 @@
 
 点击菜单栏的光标图标，可以重新打开主题库或切换主题。要换回原光标，在主题库窗口或菜单栏选择「恢复原光标」。
 
-更新时，退出纸尖，用最新安装包中的应用替换「应用程序」里的纸尖。[发行说明](https://github.com/rendeyuwei/Tipwink/releases/latest)
+从 0.7.1 起，点击纸尖的菜单栏图标，选择「检查更新…」。使用 0.7.0 等没有更新源的旧版时，只需手动替换一次。先退出纸尖，解压最新安装包，再替换「应用程序」里的 Tipwink.app。[发行说明](https://github.com/rendeyuwei/Tipwink/releases/latest)
 
 ## 光标主题
 
