@@ -20,7 +20,7 @@ Apple silicon · macOS 26 or later
 
 The menu bar icon lets you reopen the library and switch themes. Choose **Restore Original Cursor** (恢复原光标) in the library or the menu bar to switch back.
 
-To update, quit Tipwink and replace it in Applications with the latest download. [Release notes](https://github.com/rendeyuwei/Tipwink/releases/latest)
+On Tipwink 0.7.1 or later, choose **Check for Updates…** from the Tipwink menu bar icon. If you’re using an older public release without an update feed, quit Tipwink, unzip the latest download, and replace Tipwink.app in Applications once. [Release notes](https://github.com/rendeyuwei/Tipwink/releases/latest)
 
 ## Themes
 
