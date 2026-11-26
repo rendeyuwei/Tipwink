@@ -13,7 +13,7 @@
 ## 每次发布
 
 1. 从干净的已合并源码构建，记录提交，确认 `MARKETING_VERSION` 和 `CURRENT_PROJECT_VERSION` 同时递增。构建 Release 时传入 `TIPWINK_APPCAST_URL` 和 `TIPWINK_UPDATE_PUBLIC_KEY`，保持 bundle ID 和 Developer ID 团队一致。
-2. 用 Xcode Archive，随后沿用 `method=developer-id`、`signingStyle=automatic` 的 Developer ID 导出路径，固定 `manageAppVersionAndBuildNumber=false`，允许已登录 Xcode 的签名流程处理身份。完成公证、绑定并验证公证票据，再用 `ditto -c -k --keepParent` 打包。保留最终 ZIP，不要在 Sparkle 签名后重新压缩。用锁定版本的 Sparkle 工具生成正式签名清单，版本化 OSS ZIP 名称用 `Tipwink-<版本>-macOS-arm64.zip`。签名公钥应与正式包内公钥一致。
+2. Release 归档必须显式使用 `CODE_SIGN_STYLE=Manual`、`CODE_SIGN_IDENTITY=Apple Development` 和发布配置的 `DEVELOPMENT_TEAM`，不要沿用开发构建的临时签名（`-`）。提交公证或打开 Organizer 前，先跑 `scripts/verify-release-archive PATH.xcarchive EXPECTED_TEAM`。未通过就重建，不交给用户重试。Apple Development 只用于中间归档，不用于正式分发。随后沿用 `method=developer-id`、`signingStyle=automatic` 的 Developer ID 导出路径，固定 `manageAppVersionAndBuildNumber=false`，允许已登录 Xcode 的签名流程处理身份。完成公证、绑定并验证公证票据，再用 `ditto -c -k --keepParent` 打包。保留最终 ZIP，不要在 Sparkle 签名后重新压缩。命令行报 `No Accounts` 时，不能仅凭这一条断定用户没登录；可用已过归档检查的同一份产物在 Xcode Organizer 走 Developer ID → Upload。用锁定版本的 Sparkle 工具生成正式签名清单，版本化 OSS ZIP 名称用 `Tipwink-<版本>-macOS-arm64.zip`。签名公钥应与正式包内公钥一致。
 3. 运行 `scripts/release-public verify --help` 查看发布前检查参数。校验从最终 ZIP 中提取的 App：正式 feed、签名公钥、签名清单开关、预期版本和构建、安装要求、Developer ID、公证和 Sparkle 签名。先在隔离环境用同一最终 ZIP 做升级验收，记录版本和 SHA-256、从正确的基线能够发现新版、下载、安装、重启，检查用户设置保留。正式源切换后，再次检查应显示无更新（而非网络错误）。不要用开发包或只看 HTTP 200 代替。
 4. 只把过检的 ZIP 推广到正式版，先上传不可变的 OSS ZIP 并回读，再校验 GitHub 草稿的同一份 ZIP。正式 feed 最后更新；不以看到 Release 页面为结束。
 5. 运行 `scripts/release-public verify-live --help` 查看公网回读参数。核对正式源和两个下载地址的实际字节、签名、版本。用实际的上一正式版本完成生产渠道网络验证和必要的真机回归。保留提交、版本、构建号、ZIP 和清单哈希、两个地址、验收证据以及未通过的步骤。任何一步失败，状态是「未完成」。重试使用同一份签名文件，已存在对象内容不符就停；不要覆盖原包。已升级设备不会自动降级；修正既有坏包用更高构建号，保留早期已验证文件。
